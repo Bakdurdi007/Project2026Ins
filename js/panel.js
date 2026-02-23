@@ -203,22 +203,24 @@ async function startLesson(ticketId) {
 
                 <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
 
-                <div class="car-tag" style="
-                    display: inline-block;
-                    background: #f1c40f;
-                    color: #000;
-                    padding: 8px 20px;
-                    border-radius: 50px;
-                    font-weight: bold;
-                    font-size: 20px;
-                ">
-                    🚗 ${carNo}
+                <div id="actionArea">
+                    <div class="car-tag" style="
+                        display: inline-block;
+                        background: #f1c40f;
+                        color: #000;
+                        padding: 8px 20px;
+                        border-radius: 50px;
+                        font-weight: bold;
+                        font-size: 20px;
+                    ">
+                        🚗 ${carNo}
+                    </div>
                 </div>
             </div>
         `;
 
-        // Taymerni ishga tushirish
-        startCountdown(minutes * 60);
+        // TUZATISH: ticketId ni startCountdown funksiyasiga uzatdik
+        startCountdown(minutes * 60, ticketId);
 
         // Skanerni to'xtatish
         if (typeof html5QrCode !== 'undefined' && html5QrCode.getState() === 2) {
@@ -259,10 +261,10 @@ function startCountdown(duration, ticketId) {
             endSound.play().catch(e => console.log("Audio xatosi:", e));
             display.textContent = "VAQT TUGADI!";
 
-            // Mashina raqami o'rniga "Tugatish" tugmasini chiqarish
-            const carTag = document.querySelector('.car-tag');
-            if (carTag) {
-                carTag.outerHTML = `
+            // TUZATISH: actionArea orqali tugmani xavfsiz chiqaramiz
+            const actionArea = document.getElementById('actionArea');
+            if (actionArea) {
+                actionArea.innerHTML = `
                     <button onclick="finishLesson('${ticketId}')" style="
                         background: #27ae60; 
                         color: white; 
@@ -274,6 +276,7 @@ function startCountdown(duration, ticketId) {
                         cursor: pointer;
                         box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
                         margin-top: 10px;
+                        width: 100%;
                     ">
                         ✅ Mashg'ulotni yakunlash
                     </button>
