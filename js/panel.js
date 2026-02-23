@@ -138,32 +138,40 @@ html5QrCode.start({facingMode: "environment"},qrConfig, (decodedText) => {
 
 // 3. Mashg'ulotni boshlash tugmasi uchun funksiya
 async function startLesson(ticketId) {
-    // Tugmani vaqtincha faolsizlantirish (ikki marta bosilib ketmasligi uchun)
     const startBtn = document.querySelector('.start-btn');
     startBtn.disabled = true;
-    startBtn.innerText = "Yuklanmoqda...";
+    startBtn.innerText = "Bajarilmoqda...";
 
     try {
-        // 1-AMAL: Tickets jadvalida is_active qiymatini false ga o'zgartirish
-        const { data, error } = await _supabase
+        // --- 1-AMAL: Ticketni faolsizlantirish ---
+        const { data: ticketData, error: ticketError } = await _supabase
             .from('tickets')
-            .update({ is_active: false }) // Qiymatni false qilish
-            .eq('id', ticketId)           // Aynan skanerlangan ID bo'yicha
-            .select();                    // O'zgargan ma'lumotni qaytarish
+            .update({ is_active: false })
+            .eq('id', ticketId)
+            .select('instructor_id') // Bizga keyingi amal uchun instructor_id kerak
+            .single();
 
-        if (error) throw error;
+        if (ticketError) throw ticketError;
 
-        // Muvaffaqiyatli yakunlansa
-        alert("Mashg'ulot muvaffaqiyatli boshlandi! Chek faolsizlantirildi.");
+        // --- 2-AMAL: Instructorni statusini o'zgartirish ---
+        if (ticketData && ticketData.instructor_id) {
+            const { error: instructorError } = await _supabase
+                .from('instructors')
+                .update({ status: false }) // Instruktor band holatga o'tadi
+                .eq('id', ticketData.instructor_id);
 
-        // Sahifani yangilash yoki boshqa sahifaga yo'naltirish
+            if (instructorError) throw instructorError;
+        } else {
+            console.warn("Ushbu ticketga biriktirilgan instruktor topilmadi.");
+        }
+
+        // Muvaffaqiyatli yakun
+        alert("Mashg'ulot boshlandi! Chek faolsizlantirildi va instruktor band qilindi.");
         location.reload();
 
     } catch (err) {
-        console.error("Xatolik yuz berdi:", err.message);
-        alert("Xatolik: " + err.message);
-
-        // Xatolik bo'lsa tugmani qayta tiklash
+        console.error("Xatolik:", err.message);
+        alert("Xatolik yuz berdi: " + err.message);
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
