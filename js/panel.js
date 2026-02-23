@@ -88,18 +88,23 @@ async function handleTicket(ticketId) {
         </div>
 
     <div class="ticket-info-row">
-    <span>📚</span> <span class="info-label">Kurs:</span>
-    <span class="info-value">${data.course_name || '---'}</span>
+    <span>👥</span> <span class="info-label">Guruh:</span>
+    <span class="info-value">${data.group || '---'}</span>
     </div>
 
     <div class="ticket-info-row">
+    <span>📚</span> <span class="info-label">Kurs:</span>
+    <span class="info-value">${data.direction_category || '---'}</span>
+    </div>
+    
+    <div class="ticket-info-row">
     <span>💰</span> <span class="info-label">Summa:</span>
-    <span class="info-value">${data.amount || '0'} so'm</span>
+    <span class="info-value">${data.payment_amount || '0'} so'm</span>
     </div>
 
     <div class="ticket-info-row">
     <span>⌛</span> <span class="info-label">Vaqt:</span>
-    <span class="info-value">${data.duration || '---'}</span>
+    <span class="info-value">${data.minute || '---'} min</span>
     </div>
 
     <div class="ticket-info-row">
