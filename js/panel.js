@@ -170,19 +170,50 @@ async function startLesson(ticketId) {
         const minutes = data[0].lesson_minutes;
         const carNo = data[0].instructor_car_number;
 
-        // UI ni yangilash
+        // 2. UI ni Taymerga almashtirish
         resultDiv.innerHTML = `
-            <div class="timer-container" style="text-align: center; padding: 25px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                <h2 style="font-size: 16px; color: #555; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Mashg'ulot Vaqti</h2>
-                <div id="countdown" style="font-size: 55px; font-weight: 800; font-family: 'Courier New', monospace; color: #e74c3c; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
-                    00:00:00
-                </div>
-                <div style="margin: 20px 0; border-top: 2px dashed #eee;"></div>
-                <div style="font-size: 26px; font-weight: bold; background: #2c3e50; color: white; padding: 12px; border-radius: 10px; display: inline-block; min-width: 200px;">
-                     🚗 ${carNo}
-                </div>
-            </div>
-        `;
+    <div class="timer-wrapper" style="
+        background: #1a2634; 
+        color: white; 
+        padding: 30px; 
+        border-radius: 15px; 
+        text-align: center; 
+        border: 2px solid #3498db;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        margin-top: 20px;
+        position: relative;
+        z-index: 9999;
+    ">
+        <p style="margin: 0; font-size: 14px; color: #3498db; text-transform: uppercase; letter-spacing: 2px;">
+            MASHG'ULOT KETMOQDA
+        </p>
+        
+        <div id="countdown" style="
+            font-size: 55px; 
+            font-weight: 800; 
+            font-family: 'Courier New', monospace; 
+            color: #ffffff; 
+            margin: 15px 0;
+            text-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+        ">
+            00:00:00
+        </div>
+
+        <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
+
+        <div class="car-tag" style="
+            display: inline-block;
+            background: #f1c40f;
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 20px;
+        ">
+            🚗 ${instructor_car_number}
+        </div>
+    </div>
+`;
 
         startCountdown(minutes * 60);
 
@@ -200,9 +231,16 @@ async function startLesson(ticketId) {
 
 function startCountdown(duration) {
     let timer = duration, hours, minutes, seconds;
-    const display = document.querySelector('#countdown');
 
-    lessonTimer = setInterval(function () {
+    // Har soniyada yangilash
+    const interval = setInterval(function () {
+        const display = document.querySelector('#countdown');
+
+        if (!display) {
+            clearInterval(interval);
+            return;
+        }
+
         hours = parseInt(timer / 3600, 10);
         minutes = parseInt((timer % 3600) / 60, 10);
         seconds = parseInt(timer % 60, 10);
@@ -214,10 +252,10 @@ function startCountdown(duration) {
         display.textContent = hours + ":" + minutes + ":" + seconds;
 
         if (--timer < 0) {
-            clearInterval(lessonTimer);
+            clearInterval(interval);
             display.textContent = "VAQT TUGADI!";
-            display.style.color = "black";
-            alert("Mashg'ulot vaqti yakunlandi!");
+            display.style.color = "#e74c3c";
+            alert("Mashg'ulot vaqti tugadi!");
         }
     }, 1000);
 }
