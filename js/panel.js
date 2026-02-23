@@ -98,6 +98,8 @@ async function handleTicket(ticketId) {
 
     document.getElementById('result').innerText = "QR o'qildi ✅";
     document.getElementById('result').style.color = "#2ecc71";
+
+    html5QrCode.stop();
 }
 
 // 2. Kamerani ishga tushirish
