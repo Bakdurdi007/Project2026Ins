@@ -137,8 +137,12 @@ html5QrCode.start({facingMode: "environment"},qrConfig, (decodedText) => {
 });
 
 // 3. Mashg'ulotni boshlash tugmasi uchun funksiya
+// Taymer o'zgaruvchisi (global)
+let lessonTimer;
+
 async function startLesson(ticketId) {
     const startBtn = document.querySelector('.start-btn');
+    const resultDiv = document.getElementById('result'); // Ma'lumotlar chiqadigan oyna
     const currentInstId = sessionStorage.getItem('instructor_id');
 
     if (!currentInstId) {
@@ -150,30 +154,68 @@ async function startLesson(ticketId) {
     startBtn.innerText = "Bajarilmoqda...";
 
     try {
-        const { error: rpcError } = await _supabase.rpc('start_lesson_complete', {
+        // 1. RPC orqali barcha amallarni bajarish va ma'lumotlarni olish
+        const { data, error } = await _supabase.rpc('start_lesson_complete', {
             chek_id: parseInt(ticketId),
             current_instructor_id: parseInt(currentInstId)
         });
 
-        if (rpcError) throw rpcError;
+        if (error) throw error;
 
-        alert("Mashg'ulot muvaffaqiyatli boshlandi!");
+        // Ma'lumotlarni olamiz (data massiv qaytadi)
+        const { lesson_minutes, instructor_car_number } = data[0];
 
-        // Skanerni xavfsiz to'xtatish
-        try {
-            if (typeof html5QrCode !== 'undefined' && html5QrCode.getState() === 2) {
-                await html5QrCode.stop();
-            }
-        } catch (sErr) { console.warn(sErr); }
+        // 2. UI ni Taymerga almashtirish
+        resultDiv.innerHTML = `
+            <div class="timer-container" style="text-align: center; padding: 20px;">
+                <h2 style="font-size: 14px; color: #666;">MASHG'ULOT VAQTI</h2>
+                <div id="countdown" style="font-size: 48px; font-weight: bold; font-family: monospace; color: #e74c3c;">
+                    00:00:00
+                </div>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
+                <div class="car-info" style="font-size: 24px; font-weight: bold; background: #f1f1f1; padding: 10px; border-radius: 8px;">
+                     🚗 ${instructor_car_number}
+                </div>
+            </div>
+        `;
 
-        window.location.reload();
+        // 3. Taymerni ishga tushirish
+        startCountdown(lesson_minutes * 60); // minutni sekundga o'tkazamiz
+
+        // Skanerni to'xtatish (lekin reload qilmaymiz, chunki taymerni ko'rishimiz kerak)
+        if (typeof html5QrCode !== 'undefined' && html5QrCode.getState() === 2) {
+            await html5QrCode.stop();
+        }
 
     } catch (err) {
         console.error("Xato:", err);
-        alert("Xatolik yuz berdi: " + (err.message || "Noma'lum xato"));
+        alert("Xatolik: " + (err.message || "Noma'lum xato"));
         startBtn.disabled = false;
-        startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
+}
+
+function startCountdown(duration) {
+    let timer = duration, hours, minutes, seconds;
+    const display = document.querySelector('#countdown');
+
+    lessonTimer = setInterval(function () {
+        hours = parseInt(timer / 3600, 10);
+        minutes = parseInt((timer % 3600) / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        hours = hours < 10 ? "0" + hours : hours;
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = hours + ":" + minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            clearInterval(lessonTimer);
+            display.textContent = "VAQT TUGADI!";
+            display.style.color = "black";
+            alert("Mashg'ulot vaqti yakunlandi!");
+        }
+    }, 1000);
 }
 
 
