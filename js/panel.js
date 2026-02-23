@@ -139,12 +139,10 @@ html5QrCode.start({facingMode: "environment"},qrConfig, (decodedText) => {
 // 3. Mashg'ulotni boshlash tugmasi uchun funksiya
 async function startLesson(ticketId) {
     const startBtn = document.querySelector('.start-btn');
-
-    // 1. Tizimga kirgan instruktor ID-sini olish (Sizda qanday saqlangan bo'lsa shunday oling)
     const currentInstId = sessionStorage.getItem('instructor_id');
 
     if (!currentInstId) {
-        alert("Xatolik: Instruktor aniqlanmadi. Iltimos, qayta tizimga kiring. Xotiradagi ID: ", currentInstId);
+        alert("Xatolik: Instruktor aniqlanmadi. Iltimos, qayta tizimga kiring.");
         return;
     }
 
@@ -152,23 +150,34 @@ async function startLesson(ticketId) {
     startBtn.innerText = "Bajarilmoqda...";
 
     try {
-        // RPC funksiyasini ikkita parametr bilan chaqiramiz
-        const { error } = await _supabase.rpc('start_lesson_complete', {
-            chek_id: parseInt(ticketId),             // Songa aylantiramiz
+        // 1. Ma'lumotlar bazasini yangilash
+        const { error: rpcError } = await _supabase.rpc('start_lesson_complete', {
+            chek_id: parseInt(ticketId),
             current_instructor_id: parseInt(currentInstId)
         });
 
-        if (error) throw error;
+        if (rpcError) throw rpcError; // Agar bazada xato bo'lsa catchga o'tadi
 
+        // 2. Muvaffaqiyat xabari
         alert("Mashg'ulot muvaffaqiyatli boshlandi!");
 
-        // Kamerani toza yopish va sahifani yangilash
-        if (html5QrCode) await html5QrCode.stop();
+        // 3. Kamerani to'xtatish (Xatoliklarni e'tiborsiz qoldiramiz, chunki baribir reload bo'ladi)
+        try {
+            if (typeof html5QrCode !== 'undefined' && html5QrCode.getState() === 2) {
+                await html5QrCode.stop();
+            }
+        } catch (stopError) {
+            console.warn("Skaner to'xtatishda xato, lekin davom etamiz:", stopError);
+        }
+
+        // 4. Sahifani yangilash
         window.location.reload();
 
     } catch (err) {
-        console.error("Xato:", err.message);
-        alert("Xatolik yuz berdi: " + err.message);
+        console.error("Xato detali:", err);
+        // Agar err.message bo'lmasa, umumiy xatolik matnini chiqaramiz
+        alert("Xatolik yuz berdi: " + (err.message || "Noma'lum xato"));
+
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
