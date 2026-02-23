@@ -11,7 +11,7 @@ const logoutBtn = document.getElementById('logoutBtn');
 async function loadInstructorData() {
     const userLogin = sessionStorage.getItem('userName');
 
-    const { data, error } = await _supabase
+    const {data, error} = await _supabase
         .from('instructors')
         .select('full_name')
         .eq('login', userLogin)
@@ -28,37 +28,105 @@ const html5QrCode = new Html5Qrcode("reader");
 
 const qrConfig = {
     fps: 10,
-    qrbox: { width: 200, height: 200 },
+    qrbox: {width: 220, height: 220},
     aspectRatio: 1.0
 };
 
-// Kamerani ishga tushirish (orqa kamera - environment)
+// 1. QR kod skanerlanganda ishlaydigan asosiy funksiya
+async function handleTicket(ticketId) {
+    // Skanerni vaqtincha to'xtatib turish (ekran qotib qolishi uchun)
+    // html5QrCode.pause();
+
+    const {data, error} = await _supabase
+        .from('tickets')
+        .select('*')
+        .eq('id', ticketId)
+        .single();
+
+    if (error || !data) {
+        document.getElementById('result').innerText = "Xato: Ticket topilmadi!";
+        document.getElementById('result').style.color = "#e74c3c";
+        return;
+    }
+
+    const resultDiv = document.getElementById('ticketResult');
+    resultDiv.style.display = 'block'; // Ma'lumotlar oynasini ko'rsatish
+
+    // Natijani rasmga moslab chiqarish
+    resultDiv.innerHTML = `
+        <div class="ticket-header">Mashg'ulot ma'lumotlari:</div>
+        
+        <div class="ticket-info-row">
+            <span>🔑</span> <span class="info-label">Token:</span> 
+            <span class="token-value">${data.token || '---'}</span>
+        </div>
+        
+        <div class="ticket-info-row">
+            <span>👤</span> <span class="info-label">Ism:</span> 
+            <span class="info-value">${data.full_name || 'Noma`lum'}</span>
+    </div>
+
+    <div class="ticket-info-row">
+    <span>🏢</span> <span class="info-label">Markaz:</span>
+    <span class="info-value">${data.center_name || '---'}</span>
+    </div>
+
+    <div class="ticket-info-row">
+    <span>📚</span> <span class="info-label">Kurs:</span>
+    <span class="info-value">${data.course_name || '---'}</span>
+    </div>
+
+    <div class="ticket-info-row">
+    <span>💰</span> <span class="info-label">Summa:</span>
+    <span class="info-value">${data.amount || '0'} so'm</span>
+    </div>
+
+    <div class="ticket-info-row">
+    <span>⌛</span> <span class="info-label">Vaqt:</span>
+    <span class="info-value">${data.duration || '---'}</span>
+    </div>
+
+    <div class="ticket-info-row">
+    <span>📅</span> <span class="info-label">Sana:</span>
+    <span class="info-value">${new Date(data.created_at).toLocaleString('uz-UZ')}</span>
+    </div>
+
+    <button class="start-btn" onclick="startLesson('${data.id}')">
+    ▶ Mashg'ulotni boshlash
+    </button>
+    `;
+
+    document.getElementById('result').innerText = "QR o'qildi ✅";
+    document.getElementById('result').style.color = "#2ecc71";
+}
+
+// 2. Kamerani ishga tushirish
 html5QrCode.start(
-    { facingMode: "environment" },
+    {facingMode: "environment"},
     qrConfig,
     (decodedText) => {
-        // Muvaffaqiyatli skanerlanganda
-        document.getElementById('result').innerText = "QR o'qildi: " + decodedText;
-        document.getElementById('result').style.color = "#2ecc71";
-
-        // Bu yerda decodedText orqali Supabase'dan qidiruv qilasiz
-        console.log("Ma'lumot:", decodedText);
+        // QR kod o'qilishi bilan bazadan qidirishni boshlaymiz
+        handleTicket(decodedText);
+        console.log("Skanerlandi:", decodedText);
     },
     (errorMessage) => {
         // Skanerlash davom etmoqda...
     }
 ).catch((err) => {
     document.getElementById('result').innerText = "Kameraga ruxsat berilmadi!";
+    console.error(err);
 });
 
-
-
-
+// 3. Mashg'ulotni boshlash tugmasi uchun funksiya
+async function startLesson(id) {
+    alert("Mashg'ulot boshlandi! ID: " + id);
+    // Bu yerda ticket statusini 'active' qilib yangilashingiz mumkin
+}
 
 
 //0. Chiqish funksiyasi
 logoutBtn.addEventListener('click', () => {
-    if(confirm("Tizimdan chiqmoqchimisiz?")) {
+    if (confirm("Tizimdan chiqmoqchimisiz?")) {
         sessionStorage.clear();
         window.location.replace('index.html');
     }

@@ -64,7 +64,7 @@ body { background-color: var(--bg-dark); color: var(--text-white); }
     transition: 0.2s ease;
 }
 
-/* QR kod dizayni*/
+/* QR kod dizayni************************************************************************/
 .qr-wrapper {
     display: flex;
     justify-content: center;
@@ -151,7 +151,60 @@ body { background-color: var(--bg-dark); color: var(--text-white); }
     cursor: pointer !important;
     margin-top: 10px;
 }
-/* QR kod dizayni*/
+/* QR kod dizayni*******************************************************************************************/
+
+
+
+/* Mijoz ma'lumotlari **************************************************************************************/
+.ticket-wrapper {
+    margin-top: 25px;
+    padding: 20px;
+    background: #1a2333;
+    border: 2px solid #3498db;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 380px;
+}
+
+.ticket-header {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.ticket-info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.info-label { color: #a0aec0; min-width: 70px; }
+.info-value { font-weight: 500; }
+.token-value { color: #f39c12; font-weight: bold; }
+
+.start-btn {
+    width: 100%;
+    padding: 14px;
+    background: #f39c12;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.start-btn:active { transform: scale(0.98); }
+/* Mijoz ma'lumotlari **************************************************************************************/
 
 .refresh i { color: var(--online-green); font-size: 1.1rem; }
 .logout i { color: var(--logout-red); font-size: 1.1rem; }
