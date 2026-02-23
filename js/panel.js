@@ -142,7 +142,10 @@ let lessonTimer;
 
 async function startLesson(ticketId) {
     const startBtn = document.querySelector('.start-btn');
-    const resultDiv = document.getElementById('result');
+
+    // DIQQAT: Taymerni 'ticketResult' diviga chiqaramiz, chunki ma'lumotlar o'sha yerda
+    const ticketResultDiv = document.getElementById('ticketResult');
+
     const currentInstId = sessionStorage.getItem('instructor_id');
 
     if (!currentInstId) {
@@ -162,17 +165,15 @@ async function startLesson(ticketId) {
         if (error) throw error;
 
         if (!data || data.length === 0) {
-            throw new Error("Bazada bunday chek yoki instruktor topilmadi!");
+            throw new Error("Bazada ma'lumot topilmadi!");
         }
 
-        // SQL'dan kelayotgan (RETURNS TABLE) ustun nomlarini o'zgaruvchiga olamiz
-        // Eslatma: Agar SQL'da res_minutes va res_car_number deb o'zgartirgan bo'lsangiz,
-        // pastdagi nomlarni ham moslang.
+        // SQL'dan kelgan nomlarni qabul qilamiz
         const minutes = data[0].res_minutes || data[0].lesson_minutes;
         const carNo = data[0].res_car_number || data[0].instructor_car_number;
 
-        // UI ni Taymerga almashtirish
-        resultDiv.innerHTML = `
+        // UI-ni butunlay yangilaymiz (Mashg'ulot ma'lumotlari o'rniga taymer)
+        ticketResultDiv.innerHTML = `
             <div class="timer-wrapper" style="
                 background: #1a2634; 
                 color: white; 
@@ -181,9 +182,7 @@ async function startLesson(ticketId) {
                 text-align: center; 
                 border: 2px solid #3498db;
                 box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                margin-top: 20px;
-                position: relative;
-                z-index: 9999;
+                margin-top: 10px;
             ">
                 <p style="margin: 0; font-size: 14px; color: #3498db; text-transform: uppercase; letter-spacing: 2px;">
                     MASHG'ULOT KETMOQDA
@@ -195,7 +194,6 @@ async function startLesson(ticketId) {
                     font-family: 'Courier New', monospace; 
                     color: #ffffff; 
                     margin: 15px 0;
-                    text-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
                 ">
                     00:00:00
                 </div>
@@ -216,7 +214,7 @@ async function startLesson(ticketId) {
             </div>
         `;
 
-        // Taymerni ishga tushirish (sekundga aylantirib)
+        // Taymerni ishga tushirish
         startCountdown(minutes * 60);
 
         // Skanerni to'xtatish
@@ -226,10 +224,39 @@ async function startLesson(ticketId) {
 
     } catch (err) {
         console.error("To'liq xato:", err);
-        alert("Xatolik: " + (err.message || "Ulanishda xato"));
+        alert("Xatolik: " + (err.message || "Tizimda chigallik yuz berdi"));
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
+}
+
+// Taymerni sanash funksiyasi
+function startCountdown(duration) {
+    let timer = duration, hours, minutes, seconds;
+    const interval = setInterval(function () {
+        const display = document.querySelector('#countdown');
+
+        if (!display) {
+            clearInterval(interval);
+            return;
+        }
+
+        hours = parseInt(timer / 3600, 10);
+        minutes = parseInt((timer % 3600) / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        display.textContent =
+            (hours < 10 ? "0" + hours : hours) + ":" +
+            (minutes < 10 ? "0" + minutes : minutes) + ":" +
+            (seconds < 10 ? "0" + seconds : seconds);
+
+        if (--timer < 0) {
+            clearInterval(interval);
+            display.textContent = "VAQT TUGADI!";
+            display.style.color = "#e74c3c";
+            alert("Mashg'ulot vaqti tugadi!");
+        }
+    }, 1000);
 }
 
 function startCountdown(duration) {
