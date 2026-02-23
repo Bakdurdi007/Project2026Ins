@@ -41,9 +41,8 @@ async function handleTicket(ticketId) {
         .from('tickets')
         .select(`
             *,
-            centers:center_name (
-                name
-            )
+            centers:center_name ( name ),
+            admins:admin_id ( admin_fullname )
         `)
         .eq('id', ticketId)
         .single();
@@ -110,6 +109,11 @@ async function handleTicket(ticketId) {
     <div class="ticket-info-row">
     <span>📅</span> <span class="info-label">Sana:</span>
     <span class="info-value">${new Date(data.created_at).toLocaleString('uz-UZ')}</span>
+    </div>
+    
+    <div class="ticket-info-row">
+            <span>👨‍💻</span> <span class="info-label">Admin:</span>
+            <span class="info-value">${data.admins ? data.admins.admin_fullname : 'Noma\'lum'}</span>
     </div>
 
     <button class="start-btn" onclick="startLesson('${data.id}')">
