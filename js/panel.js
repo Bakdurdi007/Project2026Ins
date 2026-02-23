@@ -137,41 +137,33 @@ html5QrCode.start({facingMode: "environment"},qrConfig, (decodedText) => {
 });
 
 // 3. Mashg'ulotni boshlash tugmasi uchun funksiya
-async function startLesson(ticketId) {
-    const startBtn = document.querySelector('.start-btn');
-    startBtn.disabled = true;
-    startBtn.innerText = "Bajarilmoqda...";
-
+async function startLesson(ticketId) { // Bu yerdagi ticketId — sizning chek_id'ingiz
     try {
-        // --- 1-AMAL: Ticketni faolsizlantirish ---
+        // Avval ticketni yangilab, unga tegishli instructor_id ni olamiz
         const { data: ticketData, error: ticketError } = await _supabase
             .from('tickets')
             .update({ is_active: false })
-            .eq('id', ticketId)
-            .select('instructor_id') // Bizga keyingi amal uchun instructor_id kerak
+            .eq('id', ticketId) // SQL: WHERE tickets.id = :chek_id
+            .select('instructor_id')
             .single();
 
         if (ticketError) throw ticketError;
 
-        // --- 2-AMAL: Instructorni statusini o'zgartirish ---
+        // Mana siz so'ragan instructors jadvalini yangilash qismi:
         if (ticketData && ticketData.instructor_id) {
-            const { error } = await _supabase.rpc(
-                'start_lesson_and_bind_instructor',
-                { id: ticketId });
+            const { error: instructorError } = await _supabase
+                .from('instructors')
+                .update({ status: false }) // status = false (band)
+                .eq('id', ticketData.instructor_id); // SQL dagi: AND tickets.instructor_id = instructors.id
+
             if (instructorError) throw instructorError;
-        } else {
-            console.warn("Ushbu ticketga biriktirilgan instruktor topilmadi.");
         }
 
-        // Muvaffaqiyatli yakun
-        alert("Mashg'ulot boshlandi! Chek faolsizlantirildi va instruktor band qilindi.");
-        location.reload();
+        alert("Mashg'ulot boshlandi!");
+        window.location.reload();
 
     } catch (err) {
-        console.error("Xatolik:", err.message);
-        alert("Xatolik yuz berdi: " + err.message);
-        startBtn.disabled = false;
-        startBtn.innerText = "▶ Mashg'ulotni boshlash";
+        alert("Xatolik: " + err.message);
     }
 }
 
