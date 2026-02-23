@@ -154,8 +154,8 @@ async function startLesson(ticketId) {
     try {
         // RPC funksiyasini ikkita parametr bilan chaqiramiz
         const { error } = await _supabase.rpc('start_lesson_complete', {
-            chek_id: ticketId,
-            current_instructor_id: currentInstId
+            chek_id: parseInt(ticketId),             // Songa aylantiramiz
+            current_instructor_id: parseInt(currentInstId)
         });
 
         if (error) throw error;
