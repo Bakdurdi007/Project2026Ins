@@ -142,11 +142,11 @@ let lessonTimer;
 
 async function startLesson(ticketId) {
     const startBtn = document.querySelector('.start-btn');
-    const resultDiv = document.getElementById('result'); // Ma'lumotlar chiqadigan oyna
+    const resultDiv = document.getElementById('result');
     const currentInstId = sessionStorage.getItem('instructor_id');
 
     if (!currentInstId) {
-        alert("Xatolik: Instruktor aniqlanmadi.");
+        alert("Xatolik: Instruktor ID topilmadi!");
         return;
     }
 
@@ -154,7 +154,6 @@ async function startLesson(ticketId) {
     startBtn.innerText = "Bajarilmoqda...";
 
     try {
-        // 1. RPC orqali barcha amallarni bajarish va ma'lumotlarni olish
         const { data, error } = await _supabase.rpc('start_lesson_complete', {
             chek_id: parseInt(ticketId),
             current_instructor_id: parseInt(currentInstId)
@@ -162,35 +161,40 @@ async function startLesson(ticketId) {
 
         if (error) throw error;
 
-        // Ma'lumotlarni olamiz (data massiv qaytadi)
-        const { lesson_minutes, instructor_car_number } = data[0];
+        // Ma'lumot kelganini tekshirish
+        if (!data || data.length === 0) {
+            throw new Error("Bazada bunday chek yoki instruktor topilmadi!");
+        }
 
-        // 2. UI ni Taymerga almashtirish444
+        // SQL'da qaytayotgan ustun nomlari bilan bir xil bo'lishi shart
+        const minutes = data[0].lesson_minutes;
+        const carNo = data[0].instructor_car_number;
+
+        // UI ni yangilash
         resultDiv.innerHTML = `
-            <div class="timer-container" style="text-align: center; padding: 20px;">
-                <h2 style="font-size: 14px; color: #666;">MASHG'ULOT VAQTI</h2>
-                <div id="countdown" style="font-size: 48px; font-weight: bold; font-family: monospace; color: #e74c3c;">
+            <div class="timer-container" style="text-align: center; padding: 25px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <h2 style="font-size: 16px; color: #555; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">Mashg'ulot Vaqti</h2>
+                <div id="countdown" style="font-size: 55px; font-weight: 800; font-family: 'Courier New', monospace; color: #e74c3c; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
                     00:00:00
                 </div>
-                <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
-                <div class="car-info" style="font-size: 24px; font-weight: bold; background: #f1f1f1; padding: 10px; border-radius: 8px;">
-                     🚗 ${instructor_car_number}
+                <div style="margin: 20px 0; border-top: 2px dashed #eee;"></div>
+                <div style="font-size: 26px; font-weight: bold; background: #2c3e50; color: white; padding: 12px; border-radius: 10px; display: inline-block; min-width: 200px;">
+                     🚗 ${carNo}
                 </div>
             </div>
         `;
 
-        // 3. Taymerni ishga tushirish
-        startCountdown(lesson_minutes * 60); // minutni sekundga o'tkazamiz
+        startCountdown(minutes * 60);
 
-        // 4. Skanerni to'xtatish (lekin reload qilmaymiz, chunki taymerni ko'rishimiz kerak)
         if (typeof html5QrCode !== 'undefined' && html5QrCode.getState() === 2) {
             await html5QrCode.stop();
         }
 
     } catch (err) {
-        console.error("Xato:", err);
-        alert("Xatolik: " + (err.message || "Noma'lum xato"));
+        console.error("To'liq xato:", err);
+        alert("Xatolik: " + (err.message || "Ulanishda xato"));
         startBtn.disabled = false;
+        startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
 }
 
