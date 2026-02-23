@@ -95,10 +95,6 @@ async function handleTicket(ticketId) {
     ▶ Mashg'ulotni boshlash
     </button>
     `;
-
-    document.getElementById('result').innerText = "QR o'qildi ✅";
-    document.getElementById('result').style.color = "#2ecc71";
-
     html5QrCode.stop();
 }
 
