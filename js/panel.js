@@ -123,10 +123,7 @@ async function handleTicket(ticketId) {
 }
 
 // 2. Kamerani ishga tushirish
-html5QrCode.start(
-    {facingMode: "environment"},
-    qrConfig,
-    (decodedText) => {
+html5QrCode.start({facingMode: "environment"},qrConfig, (decodedText) => {
         // QR kod o'qilishi bilan bazadan qidirishni boshlaymiz
         handleTicket(decodedText);
         console.log("Skanerlandi:", decodedText);
@@ -140,9 +137,36 @@ html5QrCode.start(
 });
 
 // 3. Mashg'ulotni boshlash tugmasi uchun funksiya
-async function startLesson(id) {
-    alert("Mashg'ulot boshlandi! ID: " + id);
-    // Bu yerda ticket statusini 'active' qilib yangilashingiz mumkin
+async function startLesson(ticketId) {
+    // Tugmani vaqtincha faolsizlantirish (ikki marta bosilib ketmasligi uchun)
+    const startBtn = document.querySelector('.start-btn');
+    startBtn.disabled = true;
+    startBtn.innerText = "Yuklanmoqda...";
+
+    try {
+        // 1-AMAL: Tickets jadvalida is_active qiymatini false ga o'zgartirish
+        const { data, error } = await _supabase
+            .from('tickets')
+            .update({ is_active: false }) // Qiymatni false qilish
+            .eq('id', ticketId)           // Aynan skanerlangan ID bo'yicha
+            .select();                    // O'zgargan ma'lumotni qaytarish
+
+        if (error) throw error;
+
+        // Muvaffaqiyatli yakunlansa
+        alert("Mashg'ulot muvaffaqiyatli boshlandi! Chek faolsizlantirildi.");
+
+        // Sahifani yangilash yoki boshqa sahifaga yo'naltirish
+        location.reload();
+
+    } catch (err) {
+        console.error("Xatolik yuz berdi:", err.message);
+        alert("Xatolik: " + err.message);
+
+        // Xatolik bo'lsa tugmani qayta tiklash
+        startBtn.disabled = false;
+        startBtn.innerText = "▶ Mashg'ulotni boshlash";
+    }
 }
 
 
