@@ -142,7 +142,7 @@ async function startLesson(ticketId) {
     const currentInstId = sessionStorage.getItem('instructor_id');
 
     if (!currentInstId) {
-        alert("Xatolik: Instruktor aniqlanmadi. Iltimos, qayta tizimga kiring.");
+        alert("Xatolik: Instruktor aniqlanmadi.");
         return;
     }
 
@@ -150,34 +150,27 @@ async function startLesson(ticketId) {
     startBtn.innerText = "Bajarilmoqda...";
 
     try {
-        // 1. Ma'lumotlar bazasini yangilash
         const { error: rpcError } = await _supabase.rpc('start_lesson_complete', {
             chek_id: parseInt(ticketId),
             current_instructor_id: parseInt(currentInstId)
         });
 
-        if (rpcError) throw rpcError; // Agar bazada xato bo'lsa catchga o'tadi
+        if (rpcError) throw rpcError;
 
-        // 2. Muvaffaqiyat xabari
         alert("Mashg'ulot muvaffaqiyatli boshlandi!");
 
-        // 3. Kamerani to'xtatish (Xatoliklarni e'tiborsiz qoldiramiz, chunki baribir reload bo'ladi)
+        // Skanerni xavfsiz to'xtatish
         try {
             if (typeof html5QrCode !== 'undefined' && html5QrCode.getState() === 2) {
                 await html5QrCode.stop();
             }
-        } catch (stopError) {
-            console.warn("Skaner to'xtatishda xato, lekin davom etamiz:", stopError);
-        }
+        } catch (sErr) { console.warn(sErr); }
 
-        // 4. Sahifani yangilash
         window.location.reload();
 
     } catch (err) {
-        console.error("Xato detali:", err);
-        // Agar err.message bo'lmasa, umumiy xatolik matnini chiqaramiz
+        console.error("Xato:", err);
         alert("Xatolik yuz berdi: " + (err.message || "Noma'lum xato"));
-
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
