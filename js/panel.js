@@ -41,7 +41,7 @@ async function handleTicket(ticketId) {
         .from('tickets')
         .select(`
             *,
-            centers!inner (
+            centers:center_name (
                 name
             )
         `)
