@@ -70,9 +70,6 @@ async function checkCurrentLesson() {
     }
 }
 
-// Sahifa yuklanganda ushbu tekshiruvni ham chaqiramiz
-checkCurrentLesson(); // <--- SHU QATORNI QO'SHING
-
 //2. QR kodni skanerlash oynasi.
 const html5QrCode = new Html5Qrcode("reader");
 
@@ -401,5 +398,10 @@ logoutBtn.addEventListener('click', () => {
     }
 });
 
-// Sahifa yuklanganda ishga tushadi
-loadInstructorData();
+// Sahifa yuklanganda ishga tushadigan qism
+async function init() {
+    await loadInstructorData(); // Avval instruktor ismini yuklaymiz
+    await checkCurrentLesson(); // Keyin faol darsni tekshiramiz
+}
+
+init();
