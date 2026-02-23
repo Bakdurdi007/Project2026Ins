@@ -39,7 +39,12 @@ async function handleTicket(ticketId) {
 
     const {data, error} = await _supabase
         .from('tickets')
-        .select('*')
+        .select(`
+            *,
+            centers!inner (
+                name
+            )
+        `)
         .eq('id', ticketId)
         .single();
 
@@ -68,8 +73,8 @@ async function handleTicket(ticketId) {
         <div class="ticket-header">Mashg'ulot ma'lumotlari:</div>
         
         <div class="ticket-info-row">
-            <span>🔑</span> <span class="info-label">Token:</span> 
-            <span class="token-value">${data.token || '---'}</span>
+            <span>🔑</span> <span class="info-label">Navbat:</span> 
+            <span class="token-value">${data.id || '---'}</span>
         </div>
         
         <div class="ticket-info-row">
@@ -78,9 +83,9 @@ async function handleTicket(ticketId) {
     </div>
 
     <div class="ticket-info-row">
-    <span>🏢</span> <span class="info-label">Markaz:</span>
-    <span class="info-value">${data.center_name || '---'}</span>
-    </div>
+            <span>🏢</span> <span class="info-label">Markaz:</span> 
+            <span class="info-value">${data.centers ? data.centers.name : 'Topilmadi'}</span>
+        </div>
 
     <div class="ticket-info-row">
     <span>📚</span> <span class="info-label">Kurs:</span>
