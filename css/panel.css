@@ -204,6 +204,22 @@ body { background-color: var(--bg-dark); color: var(--text-white); }
 }
 
 .start-btn:active { transform: scale(0.98); }
+
+.back-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: #a0aec0;
+    border: 1px solid #34495e;
+    border-radius: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
 /* Mijoz ma'lumotlari **************************************************************************************/
 
 .refresh i { color: var(--online-green); font-size: 1.1rem; }
