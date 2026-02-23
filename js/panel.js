@@ -155,11 +155,7 @@ async function startLesson(ticketId) {
 
         // --- 2-AMAL: Instructorni statusini o'zgartirish ---
         if (ticketData && ticketData.instructor_id) {
-            const { error: instructorError } = await _supabase
-                .from('instructors')
-                .update({ status: false }) // Instruktor band holatga o'tadi
-                .eq('id', ticketData.instructor_id);
-
+            const { error } = await _supabase.rpc('start_lesson_and_bind_instructor', { chek_id: ticketId });
             if (instructorError) throw instructorError;
         } else {
             console.warn("Ushbu ticketga biriktirilgan instruktor topilmadi.");
