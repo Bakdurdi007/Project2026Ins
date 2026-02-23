@@ -137,33 +137,40 @@ html5QrCode.start({facingMode: "environment"},qrConfig, (decodedText) => {
 });
 
 // 3. Mashg'ulotni boshlash tugmasi uchun funksiya
-async function startLesson(ticketId) { // Bu yerdagi ticketId — sizning chek_id'ingiz
+async function startLesson(ticketId) {
+    const startBtn = document.querySelector('.start-btn');
+
+    // 1. Tizimga kirgan instruktor ID-sini olish (Sizda qanday saqlangan bo'lsa shunday oling)
+    const currentInstId = sessionStorage.getItem('instructor_id');
+
+    if (!currentInstId) {
+        alert("Xatolik: Instruktor aniqlanmadi. Iltimos, qayta tizimga kiring.");
+        return;
+    }
+
+    startBtn.disabled = true;
+    startBtn.innerText = "Bajarilmoqda...";
+
     try {
-        // Avval ticketni yangilab, unga tegishli instructor_id ni olamiz
-        const { data: ticketData, error: ticketError } = await _supabase
-            .from('tickets')
-            .update({ is_active: false })
-            .eq('id', ticketId) // SQL: WHERE tickets.id = :chek_id
-            .select('instructor_id')
-            .single();
+        // RPC funksiyasini ikkita parametr bilan chaqiramiz
+        const { error } = await _supabase.rpc('start_lesson_complete', {
+            chek_id: ticketId,
+            current_instructor_id: currentInstId
+        });
 
-        if (ticketError) throw ticketError;
+        if (error) throw error;
 
-        // Mana siz so'ragan instructors jadvalini yangilash qismi:
-        if (ticketData && ticketData.instructor_id) {
-            const { error: instructorError } = await _supabase
-                .from('instructors')
-                .update({ status: false }) // status = false (band)
-                .eq('id', ticketData.instructor_id); // SQL dagi: AND tickets.instructor_id = instructors.id
+        alert("Mashg'ulot muvaffaqiyatli boshlandi!");
 
-            if (instructorError) throw instructorError;
-        }
-
-        alert("Mashg'ulot boshlandi!");
+        // Kamerani toza yopish va sahifani yangilash
+        if (html5QrCode) await html5QrCode.stop();
         window.location.reload();
 
     } catch (err) {
-        alert("Xatolik: " + err.message);
+        console.error("Xato:", err.message);
+        alert("Xatolik yuz berdi: " + err.message);
+        startBtn.disabled = false;
+        startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
 }
 
