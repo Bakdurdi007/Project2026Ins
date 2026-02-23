@@ -12,6 +12,8 @@ const logoutBtn = document.getElementById('logoutBtn');
 // 1. Instructor ma'lumotlarini yuklash
 async function loadInstructorData() {
     const userLogin = sessionStorage.getItem('userName');
+    if (!userLogin) return;
+
     const {data, error} = await _supabase
         .from('instructors')
         .select('full_name')
@@ -24,57 +26,38 @@ async function loadInstructorData() {
     }
 }
 
-// BU FUNKSIYA SAHIFA YANGILANGANDA TAYMERNI TIKLAYDI
-async function checkCurrentLesson() {
-    const currentInstId = sessionStorage.getItem('instructor_id');
-    if (!currentInstId) return false; // ID bo'lmasa skanerni yoqishga ruxsat beradi
-
-    try {
-        const { data, error } = await _supabase.rpc('check_active_lesson', {
-            inst_id: parseInt(currentInstId)
-        });
-
-        if (data && data.length > 0) {
-            const lesson = data[0];
-            if (lesson.res_remaining_seconds > -3600) {
-                document.querySelector('.qr-card').style.display = 'none';
-                const ticketResultDiv = document.getElementById('ticketResult');
-                ticketResultDiv.style.display = 'block';
-                ticketResultDiv.innerHTML = `
-                    <div class="timer-wrapper" style="background: #1a2634; color: white; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #3498db; margin-top: 10px;">
-                        <p style="color: #3498db; text-transform: uppercase;">DAVOM ETAYOTGAN MASHG'ULOT</p>
-                        <div id="countdown" style="font-size: 55px; font-weight: 800; font-family: monospace; margin: 15px 0;">00:00:00</div>
-                        <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
-                        <div id="actionArea">
-                            <div class="car-tag" style="background: #f1c40f; color: #000; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 20px;">🚗 ${lesson.res_car_number}</div>
-                        </div>
-                    </div>
-                `;
-                startCountdown(lesson.res_remaining_seconds, lesson.res_ticket_id);
-                return true; // Dars topildi
-            }
-        }
-    } catch (err) {
-        console.error("Darsni tekshirishda xato:", err);
-    }
-    return false; // Dars topilmadi
-}
-
+// 2. Skaner obyekti va sozlamalari (Lekin u hali ishga tushmaydi)
 const html5QrCode = new Html5Qrcode("reader");
 const qrConfig = { fps: 10, qrbox: {width: 220, height: 220}, aspectRatio: 1.0 };
 
+// Skanerni yoqish funksiyasi
+function initScanner() {
+    html5QrCode.start({facingMode: "environment"}, qrConfig, (decodedText) => {
+        handleTicket(decodedText);
+    }, (errorMessage) => {
+        // Skanerlash davom etmoqda...
+    }).catch((err) => {
+        document.getElementById('result').innerText = "Kameraga ruxsat berilmadi!";
+        console.error(err);
+    });
+}
+
+// 3. QR kod o'qilganda chipta ma'lumotlarini chiqarish
 async function handleTicket(ticketId) {
     const {data, error} = await _supabase
         .from('tickets')
         .select(`*, centers:center_name ( name ), admins:admin_id ( admin_fullname )`)
         .eq('id', ticketId)
         .single();
+
     if (error || !data) {
         document.getElementById('result').innerText = "Xato: Ticket topilmadi!";
         document.getElementById('result').style.color = "#e74c3c";
         return;
     }
+
     try { await html5QrCode.stop(); } catch (err) { console.warn(err); }
+
     document.querySelector('.qr-card').style.display = 'none';
     const resultDiv = document.getElementById('ticketResult');
     resultDiv.style.display = 'block';
@@ -93,30 +76,28 @@ async function handleTicket(ticketId) {
     `;
 }
 
-// KAMERANI BOSHLASHNI FUNKSIYAGA OLDIK (ISHGA TUSHIRISH UCHUN)
-function initScanner() {
-    html5QrCode.start({facingMode: "environment"}, qrConfig, (decodedText) => {
-        handleTicket(decodedText);
-    }, (errorMessage) => {}).catch((err) => {
-        document.getElementById('result').innerText = "Kameraga ruxsat berilmadi!";
-    });
-}
-
+// 4. Mashg'ulotni boshlash (RPC chaqiruvi)
 async function startLesson(ticketId) {
     const startBtn = document.querySelector('.start-btn');
     const ticketResultDiv = document.getElementById('ticketResult');
     const currentInstId = sessionStorage.getItem('instructor_id');
+
     if (!currentInstId) { alert("Xatolik: Instruktor ID topilmadi!"); return; }
+
     startBtn.disabled = true;
     startBtn.innerText = "Bajarilmoqda...";
+
     try {
         const { data, error } = await _supabase.rpc('start_lesson_complete', {
             chek_id: parseInt(ticketId),
             current_instructor_id: parseInt(currentInstId)
         });
         if (error) throw error;
+
         const minutes = data[0].res_minutes || data[0].lesson_minutes;
         const carNo = data[0].res_car_number || data[0].instructor_car_number;
+
+        // Taymer interfeysi
         ticketResultDiv.innerHTML = `
             <div class="timer-wrapper" style="background: #1a2634; color: white; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #3498db; margin-top: 10px;">
                 <p style="margin: 0; font-size: 14px; color: #3498db; text-transform: uppercase; letter-spacing: 2px;">MASHG'ULOT KETMOQDA</p>              
@@ -135,35 +116,50 @@ async function startLesson(ticketId) {
     }
 }
 
+// 5. Taymer hisoblagichi
 function startCountdown(duration, ticketId) {
     let timer = duration, hours, minutes, seconds;
-    if (timer <= 0) {
-        const display = document.querySelector('#countdown');
-        if (display) display.textContent = "VAQT TUGADI!";
+
+    // Tugatish funksiyasi (HTML ga chiqarish uchun)
+    const showFinishButton = () => {
         const actionArea = document.getElementById('actionArea');
         if (actionArea) {
             actionArea.innerHTML = `<button onclick="finishLesson('${ticketId}')" style="background: #27ae60; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%;">✅ Mashg'ulotni yakunlash</button>`;
         }
+    };
+
+    if (timer <= 0) {
+        const display = document.querySelector('#countdown');
+        if (display) {
+            display.textContent = "VAQT TUGADI!";
+            display.style.color = "#e74c3c";
+        }
+        showFinishButton();
         return;
     }
+
     const interval = setInterval(function () {
         const display = document.querySelector('#countdown');
         if (!display) { clearInterval(interval); return; }
+
         if (timer === 600) warningSound.play().catch(e => {});
+
         hours = Math.floor(timer / 3600);
         minutes = Math.floor((timer % 3600) / 60);
         seconds = Math.floor(timer % 60);
+
         display.textContent = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+
         if (--timer < 0) {
             clearInterval(interval);
             endSound.play().catch(e => {});
             display.textContent = "VAQT TUGADI!";
-            const actionArea = document.getElementById('actionArea');
-            if (actionArea) actionArea.innerHTML = `<button onclick="finishLesson('${ticketId}')" style="background: #27ae60; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%;">✅ Mashg'ulotni yakunlash</button>`;
+            showFinishButton();
         }
     }, 1000);
 }
 
+// 6. Mashg'ulotni yakunlash
 async function finishLesson(ticketId) {
     const finishBtn = event.target;
     finishBtn.disabled = true;
@@ -176,20 +172,76 @@ async function finishLesson(ticketId) {
     } catch (err) {
         alert("Xatolik: " + err.message);
         finishBtn.disabled = false;
+        finishBtn.innerText = "✅ Mashg'ulotni yakunlash";
     }
 }
 
+// 7. Logout
 logoutBtn.addEventListener('click', () => {
-    if (confirm("Tizimdan chiqmoqchimisiz?")) { sessionStorage.clear(); window.location.replace('index.html'); }
+    if (confirm("Tizimdan chiqmoqchimisiz?")) {
+        sessionStorage.clear();
+        window.location.replace('index.html');
+    }
 });
 
-// ASOSIY ISHGA TUSHIRISH QISMI
+// ==========================================
+// 8. ASOSIY ISHGA TUSHIRISH (TEMIR VARIANT)
+// ==========================================
 async function main() {
-    await loadInstructorData();
-    const hasActiveLesson = await checkCurrentLesson();
-    if (!hasActiveLesson) {
-        initScanner(); // Faqat dars bo'lmasa kamerani yoqamiz
+    try {
+        // Avval instruktor ismini yozamiz
+        await loadInstructorData();
+
+        const currentInstId = sessionStorage.getItem('instructor_id');
+
+        // Agar ID bo'lmasa, demak tizimga kirmagan, skanerni yoqamiz
+        if (!currentInstId) {
+            initScanner();
+            return;
+        }
+
+        // Bazadan faol darsni tekshiramiz
+        const { data, error } = await _supabase.rpc('check_active_lesson', {
+            inst_id: parseInt(currentInstId)
+        });
+
+        if (error) throw error;
+
+        // Agar faol dars bo'lsa - TAYMERNI TIKLAYMIZ
+        if (data && data.length > 0) {
+            const lesson = data[0];
+
+            // 1 soatdan ko'p o'tib ketmagan bo'lsa ko'rsatamiz
+            if (lesson.res_remaining_seconds > -3600) {
+                document.querySelector('.qr-card').style.display = 'none';
+                const ticketResultDiv = document.getElementById('ticketResult');
+                ticketResultDiv.style.display = 'block';
+                ticketResultDiv.innerHTML = `
+                    <div class="timer-wrapper" style="background: #1a2634; color: white; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #3498db; margin-top: 10px;">
+                        <p style="color: #3498db; text-transform: uppercase;">DAVOM ETAYOTGAN MASHG'ULOT</p>
+                        <div id="countdown" style="font-size: 55px; font-weight: 800; font-family: monospace; margin: 15px 0;">00:00:00</div>
+                        <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
+                        <div id="actionArea">
+                            <div class="car-tag" style="background: #f1c40f; color: #000; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 20px;">🚗 ${lesson.res_car_number}</div>
+                        </div>
+                    </div>
+                `;
+                startCountdown(lesson.res_remaining_seconds, lesson.res_ticket_id);
+            } else {
+                // Dars vaqti juda o'tib ketgan bo'lsa skanerni yoqamiz
+                initScanner();
+            }
+        } else {
+            // Faol dars topilmadi - skanerni yoqamiz
+            initScanner();
+        }
+
+    } catch (err) {
+        console.error("Main funksiyasida xato:", err);
+        // Xatolik bo'lsa ham skanerni yoqish (foydalanuvchi qolib ketmasligi uchun)
+        initScanner();
     }
 }
 
+// HAMMASINI BOSHLASH
 main();
