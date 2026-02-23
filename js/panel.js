@@ -144,7 +144,7 @@ async function startLesson(ticketId) {
     const currentInstId = sessionStorage.getItem('instructor_id');
 
     if (!currentInstId) {
-        alert("Xatolik: Instruktor aniqlanmadi. Iltimos, qayta tizimga kiring.");
+        alert("Xatolik: Instruktor aniqlanmadi. Iltimos, qayta tizimga kiring. Xotiradagi ID: ", currentInstId);
         return;
     }
 
