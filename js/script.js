@@ -26,7 +26,7 @@ loginForm.addEventListener('submit', async (e) => {
         // sessionStorage brauzer yopilishi bilan o'chib ketadi.
         sessionStorage.setItem('userAuthenticated', 'true');
         sessionStorage.setItem('userName', data.login);
-
+        sessionStorage.setItem('instructor_id', data.id);
         window.location.replace('panel.html'); // 'replace' orqaga qaytishni bloklaydi
     }
 });
