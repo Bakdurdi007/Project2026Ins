@@ -168,14 +168,6 @@ body { background-color: var(--bg-dark); color: var(--text-white); }
 }
 
 /* Asosiy konteynerni ekranga nisbatan markazlashtirish */
-.panel-container {
-    display: flex;
-    justify-content: center; /* Gorizontal markaz */
-    align-items: center;     /* Vertikal markaz */
-    min-height: calc(100vh - 80px); /* Navbardan qolgan barcha bo'shliq */
-    padding: 20px;
-    width: 100%;
-}
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
