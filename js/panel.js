@@ -3,6 +3,9 @@ const supabaseUrl = 'https://wczijkqackrmzssfgdqm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indjemlqa3FhY2tybXpzc2ZnZHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTk4MzksImV4cCI6MjA4NzE3NTgzOX0.ooRafiR7nR08d1f0_XEyX19AXPHRaOzjurNYw7SvZwI';
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
+const warningSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); // 10 min qolganda
+const endSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');     // Tugaganda
+
 // DOM elementlari
 const instructorNameElem = document.getElementById('instructorName');
 const logoutBtn = document.getElementById('logoutBtn');
@@ -231,19 +234,20 @@ async function startLesson(ticketId) {
 }
 
 // Taymerni sanash funksiyasi
-function startCountdown(duration) {
+function startCountdown(duration, ticketId) {
     let timer = duration, hours, minutes, seconds;
-    const interval = setInterval(function () {
+    const interval = setInterval(async function () {
         const display = document.querySelector('#countdown');
+        if (!display) { clearInterval(interval); return; }
 
-        if (!display) {
-            clearInterval(interval);
-            return;
+        // 10 daqiqa qolganda ogohlantirish (600 sekund)
+        if (timer === 600) {
+            warningSound.play().catch(e => console.log("Audio xatosi:", e));
         }
 
-        hours = parseInt(timer / 3600, 10);
-        minutes = parseInt((timer % 3600) / 60, 10);
-        seconds = parseInt(timer % 60, 10);
+        hours = Math.floor(timer / 3600);
+        minutes = Math.floor((timer % 3600) / 60);
+        seconds = Math.floor(timer % 60);
 
         display.textContent =
             (hours < 10 ? "0" + hours : hours) + ":" +
@@ -252,44 +256,55 @@ function startCountdown(duration) {
 
         if (--timer < 0) {
             clearInterval(interval);
+            endSound.play().catch(e => console.log("Audio xatosi:", e));
             display.textContent = "VAQT TUGADI!";
-            display.style.color = "#e74c3c";
-            alert("Mashg'ulot vaqti tugadi!");
+
+            // Mashina raqami o'rniga "Tugatish" tugmasini chiqarish
+            const carTag = document.querySelector('.car-tag');
+            if (carTag) {
+                carTag.outerHTML = `
+                    <button onclick="finishLesson('${ticketId}')" style="
+                        background: #27ae60; 
+                        color: white; 
+                        border: none; 
+                        padding: 15px 30px; 
+                        border-radius: 10px; 
+                        font-size: 18px; 
+                        font-weight: bold; 
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+                        margin-top: 10px;
+                    ">
+                        ✅ Mashg'ulotni yakunlash
+                    </button>
+                `;
+            }
         }
     }, 1000);
 }
 
-function startCountdown(duration) {
-    let timer = duration, hours, minutes, seconds;
+// 4. Darsni tugatish funksiyasi
+async function finishLesson(ticketId) {
+    const finishBtn = event.target;
+    finishBtn.disabled = true;
+    finishBtn.innerText = "Yakunlanmoqda...";
 
-    // Har soniyada yangilash
-    const interval = setInterval(function () {
-        const display = document.querySelector('#countdown');
+    try {
+        const { error } = await _supabase.rpc('end_lesson_complete', {
+            chek_id: parseInt(ticketId)
+        });
 
-        if (!display) {
-            clearInterval(interval);
-            return;
-        }
+        if (error) throw error;
 
-        hours = parseInt(timer / 3600, 10);
-        minutes = parseInt((timer % 3600) / 60, 10);
-        seconds = parseInt(timer % 60, 10);
+        alert("Mashg'ulot yakunlandi va vaqt hisoblandi!");
+        window.location.reload(); // Hammasini tozalab boshiga qaytamiz
 
-        hours = hours < 10 ? "0" + hours : hours;
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-
-        display.textContent = hours + ":" + minutes + ":" + seconds;
-
-        if (--timer < 0) {
-            clearInterval(interval);
-            display.textContent = "VAQT TUGADI!";
-            display.style.color = "#e74c3c";
-            alert("Mashg'ulot vaqti tugadi!");
-        }
-    }, 1000);
+    } catch (err) {
+        alert("Xatolik: " + err.message);
+        finishBtn.disabled = false;
+        finishBtn.innerText = "✅ Mashg'ulotni yakunlash";
+    }
 }
-
 
 //0. Chiqish funksiyasi
 logoutBtn.addEventListener('click', () => {
