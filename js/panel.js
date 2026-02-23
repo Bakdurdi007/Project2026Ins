@@ -26,6 +26,53 @@ async function loadInstructorData() {
     }
 }
 
+// Sahifa yuklanganda davom etayotgan darsni tekshirish
+async function checkCurrentLesson() {
+    const currentInstId = sessionStorage.getItem('instructor_id');
+    if (!currentInstId) return;
+
+    try {
+        const { data, error } = await _supabase.rpc('check_active_lesson', {
+            inst_id: parseInt(currentInstId)
+        });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            const lesson = data[0];
+
+            // Agar vaqt hali tugamagan bo'lsa (yoki ozgina o'tib ketgan bo'lsa ham tugmani ko'rsatish uchun)
+            if (lesson.res_remaining_seconds > -3600) { // 1 soat o'tib ketmagan bo'lsa
+
+                // Skanerlash kartasini yashiramiz
+                document.querySelector('.qr-card').style.display = 'none';
+                const ticketResultDiv = document.getElementById('ticketResult');
+                ticketResultDiv.style.display = 'block';
+
+                // Taymer interfeysini chizamiz
+                ticketResultDiv.innerHTML = `
+                    <div class="timer-wrapper" style="background: #1a2634; color: white; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #3498db; margin-top: 10px;">
+                        <p style="color: #3498db; text-transform: uppercase;">DAVOM ETAYOTGAN MASHG'ULOT</p>
+                        <div id="countdown" style="font-size: 55px; font-weight: 800; font-family: monospace; margin: 15px 0;">00:00:00</div>
+                        <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
+                        <div id="actionArea">
+                            <div class="car-tag" style="background: #f1c40f; color: #000; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 20px;">🚗 ${lesson.res_car_number}</div>
+                        </div>
+                    </div>
+                `;
+
+                // Taymerni qolgan soniyadan boshlaymiz
+                startCountdown(lesson.res_remaining_seconds, lesson.res_ticket_id);
+            }
+        }
+    } catch (err) {
+        console.error("Darsni tekshirishda xato:", err);
+    }
+}
+
+// Sahifa yuklanganda ushbu tekshiruvni ham chaqiramiz
+checkCurrentLesson(); // <--- SHU QATORNI QO'SHING
+
 //2. QR kodni skanerlash oynasi.
 const html5QrCode = new Html5Qrcode("reader");
 
@@ -237,7 +284,40 @@ async function startLesson(ticketId) {
 
 // Taymerni sanash funksiyasi
 function startCountdown(duration, ticketId) {
+    // Sahifa yangilanganda duration manfiy bo'lishi mumkin, shuning uchun timer o'zgaruvchisini saqlaymiz
     let timer = duration, hours, minutes, seconds;
+
+    // AGAR vaqt allaqachon tugab bo'lgan bo'lsa (sahifa yangilanganda)
+    if (timer <= 0) {
+        const display = document.querySelector('#countdown');
+        if (display) {
+            display.textContent = "VAQT TUGADI!";
+            display.style.color = "#e74c3c";
+        }
+
+        const actionArea = document.getElementById('actionArea');
+        if (actionArea) {
+            actionArea.innerHTML = `
+                <button onclick="finishLesson('${ticketId}')" style="
+                    background: #27ae60; 
+                    color: white; 
+                    border: none; 
+                    padding: 15px 30px; 
+                    border-radius: 10px; 
+                    font-size: 18px; 
+                    font-weight: bold; 
+                    cursor: pointer;
+                    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+                    margin-top: 10px;
+                    width: 100%;
+                ">
+                    ✅ Mashg'ulotni yakunlash
+                </button>
+            `;
+        }
+        return; // Funksiyani shu yerda to'xtatamiz, setInterval kerak emas
+    }
+
     const interval = setInterval(async function () {
         const display = document.querySelector('#countdown');
         if (!display) { clearInterval(interval); return; }
