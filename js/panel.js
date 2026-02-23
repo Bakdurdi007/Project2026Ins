@@ -165,7 +165,7 @@ async function startLesson(ticketId) {
         // Ma'lumotlarni olamiz (data massiv qaytadi)
         const { lesson_minutes, instructor_car_number } = data[0];
 
-        // 2. UI ni Taymerga almashtirish
+        // 2. UI ni Taymerga almashtirish44
         resultDiv.innerHTML = `
             <div class="timer-container" style="text-align: center; padding: 20px;">
                 <h2 style="font-size: 14px; color: #666;">MASHG'ULOT VAQTI</h2>
