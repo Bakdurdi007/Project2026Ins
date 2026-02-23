@@ -285,21 +285,25 @@ function startCountdown(duration, ticketId) {
 
 // 4. Darsni tugatish funksiyasi
 async function finishLesson(ticketId) {
+    // Agar ticketId string bo'lsa, son qilib olamiz
+    const cleanId = parseInt(ticketId);
+
     const finishBtn = event.target;
     finishBtn.disabled = true;
-    finishBtn.innerText = "Yakunlanmoqda...";
+    finishBtn.innerText = "Bazaga yozilmoqda...";
 
     try {
         const { error } = await _supabase.rpc('end_lesson_complete', {
-            chek_id: parseInt(ticketId)
+            chek_id: cleanId
         });
 
         if (error) throw error;
 
-        alert("Mashg'ulot yakunlandi va vaqt hisoblandi!");
-        window.location.reload(); // Hammasini tozalab boshiga qaytamiz
+        alert("Mashg'ulot muvaffaqiyatli yakunlandi!");
+        window.location.reload();
 
     } catch (err) {
+        console.error("Finish Error:", err);
         alert("Xatolik: " + err.message);
         finishBtn.disabled = false;
         finishBtn.innerText = "✅ Mashg'ulotni yakunlash";
