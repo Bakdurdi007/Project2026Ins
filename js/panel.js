@@ -49,6 +49,17 @@ async function handleTicket(ticketId) {
         return;
     }
 
+    // 1. Kamerani o'chirish va resurslarni bo'shatish
+    try {
+        await html5QrCode.stop(); // Skanerni to'xtatadi
+    } catch (err) {
+        console.warn("Kamerani to'xtatishda xatolik:", err);
+    }
+
+    // 2. Skaner kartasini (UI) butunlay yashirish
+    document.querySelector('.qr-card').style.display = 'none';
+
+    // 3. Natija oynasini ko'rsatish va ma'lumotlarni joylash
     const resultDiv = document.getElementById('ticketResult');
     resultDiv.style.display = 'block'; // Ma'lumotlar oynasini ko'rsatish
 
@@ -95,7 +106,6 @@ async function handleTicket(ticketId) {
     ▶ Mashg'ulotni boshlash
     </button>
     `;
-    html5QrCode.stop();
 }
 
 // 2. Kamerani ishga tushirish
