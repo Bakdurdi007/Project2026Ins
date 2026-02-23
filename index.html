@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Instructor System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="login-container">
+    <form id="loginForm" class="login-card">
+        <h2>Kirish</h2>
+        <p>Tizimga kirish uchun ma'lumotlarni kiriting</p>
+
+        <div class="input-group">
+            <input type="text" id="login" placeholder="998991234567" required>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Parol" required>
+        </div>
+
+        <button type="submit" id="loginBtn">Kirish</button>
+        <div id="message"></div>
+    </form>
+</div>
+<script src="js/script.js"></script>
+</body>
+</html>

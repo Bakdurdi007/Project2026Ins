@@ -1,0 +1,166 @@
+:root {
+    --bg-dark: #0b1426; /* Rasmdagi to'q ko'k fon */
+    --card-bg: #1a2333;
+    --text-white: #ffffff;
+    --text-gray: #a0aec0;
+    --online-green: #2ecc71;
+    --logout-red: #e74c3c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+body { background-color: var(--bg-dark); color: var(--text-white); }
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--bg-dark);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-info h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--online-green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--online-green);
+}
+
+.status-text {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+}
+
+.nav-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.icon-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+/* QR kod dizayni*/
+.qr-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+.qr-card {
+    background-color: #1a2333; /* To'q ko'k rang */
+    padding: 30px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.qr-card h3 {
+    color: #fff;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+}
+
+.qr-subtitle {
+    color: #a0aec0;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+}
+
+.scanner-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+    background: #0b1426;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Kutubxonaning ichki qismlarini yashirish va moslash */
+#reader {
+    border: none !important;
+}
+
+#reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+/* Skaner ramkasi (Corners) */
+.scanner-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+}
+
+.corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #ffffff;
+}
+
+.top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; border-top-left-radius: 10px; }
+.top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; border-top-right-radius: 10px; }
+.bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; border-bottom-left-radius: 10px; }
+.bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; border-bottom-right-radius: 10px; }
+
+.scan-status {
+    margin-top: 20px;
+    color: #718096;
+    font-size: 0.85rem;
+}
+
+/* Kutubxonaning standart tugmalarini dizayni */
+#reader__dashboard_section_csr button {
+    background-color: #2ecc71 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    margin-top: 10px;
+}
+/* QR kod dizayni*/
+
+.refresh i { color: var(--online-green); font-size: 1.1rem; }
+.logout i { color: var(--logout-red); font-size: 1.1rem; }
+
+.icon-btn:active { transform: scale(0.9); opacity: 0.8; }
+
+/* Mobil qurilmalar uchun maxsus */
+@media (max-width: 480px) {
+    .navbar { padding: 12px 15px; }
+    .user-info h1 { font-size: 1.1rem; }
+    .icon-btn { width: 38px; height: 38px; }
+}

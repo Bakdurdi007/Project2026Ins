@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Panel</title>
+    <link rel="stylesheet" href="css/panel.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // SAHIFA YUKLANISHDAN OLDIN TEKSHIRISH (Security Guard)
+        if (sessionStorage.getItem('userAuthenticated') !== 'true') {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body>
+
+
+<div class="panel-container">
+
+    <nav class="navbar">
+        <div class="user-info">
+            <h1 id="instructorName">Yuklanmoqda...</h1>
+            <div class="status-indicator">
+                <span class="dot"></span>
+                <span class="status-text">Online</span>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <button onclick="location.reload()" class="icon-btn refresh" title="Yangilash">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+            <button id="logoutBtn" class="icon-btn logout" title="Chiqish">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="qr-wrapper">
+        <div class="qr-card">
+            <h3>QR Kodni Skanerlang</h3>
+            <p class="qr-subtitle">O'quvchi chekidagi kodni skanerlang</p>
+
+            <div class="scanner-container">
+                <div id="reader"></div>
+                <div class="scanner-overlay">
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+                </div>
+            </div>
+
+            <div id="result" class="scan-status">Skanerlash boshlanmoqda...</div>
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+
+
+
+<script src="js/panel.js"></script>
+</body>
+</html>
