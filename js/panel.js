@@ -161,62 +161,65 @@ async function startLesson(ticketId) {
 
         if (error) throw error;
 
-        // Ma'lumot kelganini tekshirish
         if (!data || data.length === 0) {
             throw new Error("Bazada bunday chek yoki instruktor topilmadi!");
         }
 
-        // SQL'da qaytayotgan ustun nomlari bilan bir xil bo'lishi shart
-        const minutes = data[0].lesson_minutes;
-        const carNo = data[0].instructor_car_number;
+        // SQL'dan kelayotgan (RETURNS TABLE) ustun nomlarini o'zgaruvchiga olamiz
+        // Eslatma: Agar SQL'da res_minutes va res_car_number deb o'zgartirgan bo'lsangiz,
+        // pastdagi nomlarni ham moslang.
+        const minutes = data[0].res_minutes || data[0].lesson_minutes;
+        const carNo = data[0].res_car_number || data[0].instructor_car_number;
 
-        // 2. UI ni Taymerga almashtirish
+        // UI ni Taymerga almashtirish
         resultDiv.innerHTML = `
-    <div class="timer-wrapper" style="
-        background: #1a2634; 
-        color: white; 
-        padding: 30px; 
-        border-radius: 15px; 
-        text-align: center; 
-        border: 2px solid #3498db;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        margin-top: 20px;
-        position: relative;
-        z-index: 9999;
-    ">
-        <p style="margin: 0; font-size: 14px; color: #3498db; text-transform: uppercase; letter-spacing: 2px;">
-            MASHG'ULOT KETMOQDA
-        </p>
-        
-        <div id="countdown" style="
-            font-size: 55px; 
-            font-weight: 800; 
-            font-family: 'Courier New', monospace; 
-            color: #ffffff; 
-            margin: 15px 0;
-            text-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
-        ">
-            00:00:00
-        </div>
+            <div class="timer-wrapper" style="
+                background: #1a2634; 
+                color: white; 
+                padding: 30px; 
+                border-radius: 15px; 
+                text-align: center; 
+                border: 2px solid #3498db;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                margin-top: 20px;
+                position: relative;
+                z-index: 9999;
+            ">
+                <p style="margin: 0; font-size: 14px; color: #3498db; text-transform: uppercase; letter-spacing: 2px;">
+                    MASHG'ULOT KETMOQDA
+                </p>
+                
+                <div id="countdown" style="
+                    font-size: 55px; 
+                    font-weight: 800; 
+                    font-family: 'Courier New', monospace; 
+                    color: #ffffff; 
+                    margin: 15px 0;
+                    text-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+                ">
+                    00:00:00
+                </div>
 
-        <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
+                <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
 
-        <div class="car-tag" style="
-            display: inline-block;
-            background: #f1c40f;
-            color: #000;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 20px;
-        ">
-            🚗 ${instructor_car_number}
-        </div>
-    </div>
-`;
+                <div class="car-tag" style="
+                    display: inline-block;
+                    background: #f1c40f;
+                    color: #000;
+                    padding: 8px 20px;
+                    border-radius: 50px;
+                    font-weight: bold;
+                    font-size: 20px;
+                ">
+                    🚗 ${carNo}
+                </div>
+            </div>
+        `;
 
+        // Taymerni ishga tushirish (sekundga aylantirib)
         startCountdown(minutes * 60);
 
+        // Skanerni to'xtatish
         if (typeof html5QrCode !== 'undefined' && html5QrCode.getState() === 2) {
             await html5QrCode.stop();
         }
