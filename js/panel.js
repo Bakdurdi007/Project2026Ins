@@ -171,17 +171,37 @@ function startCountdown(duration, ticketId) {
     }, 1000);
 }
 
-async function finishLesson(ticketId) {
-    event.target.disabled = true;
-    event.target.innerText = "Yozilmoqda...";
+// 6. Mashg'ulotni yakunlash
+async function finishLesson() {
+    // Agar event topilmasa, xato bermasligi uchun tekshiruv
+    const finishBtn = window.event ? window.event.target : document.querySelector('#actionArea button');
+    if (finishBtn) {
+        finishBtn.disabled = true;
+        finishBtn.innerText = "Yakunlanmoqda...";
+    }
+
+    const currentInstId = sessionStorage.getItem('instructor_id');
+    if (!currentInstId) {
+        alert("Xatolik: Instruktor tizimga kirmagan!");
+        return;
+    }
+
     try {
-        const { error } = await _supabase.rpc('end_lesson_complete', { chek_id: parseInt(ticketId) });
+        // Parametr nomi SQL dagi nom bilan bir xil bo'lishi SHART: current_inst_id
+        const { error } = await _supabase.rpc('end_lesson_complete', {
+            current_inst_id: parseInt(currentInstId)
+        });
+
         if (error) throw error;
+
+        alert("Mashg'ulot muvaffaqiyatli yakunlandi!");
         window.location.reload();
     } catch (err) {
-        alert("Xato: " + err.message);
-        event.target.disabled = false;
-        event.target.innerText = "✅ Mashg'ulotni yakunlash";
+        alert("Yakunlashda xatolik: " + err.message);
+        if (finishBtn) {
+            finishBtn.disabled = false;
+            finishBtn.innerText = "✅ Mashg'ulotni yakunlash";
+        }
     }
 }
 
