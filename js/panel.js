@@ -192,62 +192,31 @@ logoutBtn.addEventListener('click', () => {
     }
 });
 
+// 1. Sahifa yuklanganda holatni tekshirish
 async function main() {
     try {
-        // 1. Avval instruktor ismini yuklaymiz
         await loadInstructorData();
-
         const currentInstId = sessionStorage.getItem('instructor_id');
 
-        // Agar instruktor ID-si bo'lmasa, demak tizimga kirmagan - skanerni yoqamiz
         if (!currentInstId) {
             document.querySelector('.qr-card').style.display = 'block';
             initScanner();
             return;
         }
 
-        // 2. Bazadan faol darsni tekshiramiz (RPC orqali)
-        // Bu funksiya endi 'active_ticket_id' orqali juda tez javob qaytaradi
-        const { data, error } = await _supabase.rpc('check_active_lesson', {
-            inst_id: parseInt(currentInstId)
-        });
+        // Faol darsni tekshiramiz
+        const { data, error } = await _supabase.rpc('check_active_lesson', { inst_id: parseInt(currentInstId) });
 
-        if (error) throw error;
-
-        // 3. Qaror qabul qilish (Data bormi yoki yo'q?)
-        if (data && data.length > 0) {
-            // DARS BOR: Skaner oynasini yashirib, taymerni chiqaramiz
-            const lesson = data[0];
-
-            document.querySelector('.qr-card').style.display = 'none';
-            const ticketResultDiv = document.getElementById('ticketResult');
-            ticketResultDiv.style.display = 'block';
-
-            ticketResultDiv.innerHTML = `
-                <div class="timer-wrapper" style="background: #1a2634; color: white; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #3498db; margin-top: 10px;">
-                    <p style="color: #3498db; text-transform: uppercase; letter-spacing: 2px;">MASHG'ULOT DAVOM ETMOQDA</p>
-                    <div id="countdown" style="font-size: 55px; font-weight: 800; font-family: monospace; margin: 15px 0;">00:00:00</div>
-                    <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
-                    <div id="actionArea">
-                        <div class="car-tag" style="background: #f1c40f; color: #000; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 20px;">🚗 ${lesson.res_car_number}</div>
-                    </div>
-                </div>
-            `;
-
-            // Taymerni qolgan soniyadan boshlab ishga tushirish
-            startCountdown(lesson.res_remaining_seconds, lesson.res_ticket_id);
-
+        if (!error && data && data.length > 0) {
+            // Dars bor bo'lsa taymerni chiqaramiz
+            showTimerUI(data[0]);
         } else {
-            // DARS YO'Q: Skaner oynasini ko'rsatamiz va kamerani yoqamiz
+            // Dars bo'lmasa skanerni yoqamiz
             document.querySelector('.qr-card').style.display = 'block';
-            document.getElementById('ticketResult').style.display = 'none';
             initScanner();
         }
-
     } catch (err) {
-        console.error("Asosiy mantiqda xatolik:", err);
-        // Har qanday xatolikda foydalanuvchi "qolib ketmasligi" uchun skanerni ochamiz
-        document.querySelector('.qr-card').style.display = 'block';
+        console.error(err);
         initScanner();
     }
 }
