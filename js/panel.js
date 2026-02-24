@@ -96,9 +96,9 @@ async function startLesson(ticketId) {
     startBtn.innerText = "Bajarilmoqda...";
 
     try {
-        const { data, error } = await _supabase.rpc('start_lesson_complete', {
+        const { data, error } = await _supabase.rpc('handle_instructor_scan', {
             chek_id: parseInt(ticketId),
-            current_instructor_id: parseInt(currentInstId)
+            inst_id: parseInt(currentInstId)
         });
         if (error) throw error;
 
