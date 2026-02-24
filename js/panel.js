@@ -1,12 +1,15 @@
-window.onerror = function(msg, url, linenumber) {
-    alert('XATO YUZ BERDI: ' + msg + '\nQatordagi raqam: ' + linenumber);
-    return false;
-};
-
-// Supabase sozlamalari
+// Supabase sozlamalari - Lock timeout muammosini hal qilish bilan
 const supabaseUrl = 'https://wczijkqackrmzssfgdqm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indjemlqa3FhY2tybXpzc2ZnZHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTk4MzksImV4cCI6MjA4NzE3NTgzOX0.ooRafiR7nR08d1f0_XEyX19AXPHRaOzjurNYw7SvZwI';
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: true,
+        detectSessionInUrl: false,
+        storage: window.sessionStorage, // LocalStorage o'rniga SessionStorage ishlatish xavfsizroq
+        flowType: 'implicit'
+    }
+});
 
 const warningSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 const endSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
@@ -189,39 +192,51 @@ logoutBtn.addEventListener('click', () => {
     }
 });
 
-// ==========================================
-// 8. ASOSIY ISHGA TUSHIRISH (TEMIR VARIANT)
-// ==========================================
 async function main() {
-    alert("1-qadam: Dastur boshlandi");
     try {
+        await loadInstructorData();
         const currentInstId = sessionStorage.getItem('instructor_id');
-        alert("2-qadam: ID topildi: " + currentInstId);
 
-        const { data, error } = await _supabase.rpc('check_active_lesson', {
-            inst_id: parseInt(currentInstId)
-        });
-
-        if (error) {
-            alert("RPC XATOSI: " + error.message);
+        if (!currentInstId) {
+            document.querySelector('.qr-card').style.display = 'block';
+            initScanner();
             return;
         }
 
-        alert("3-qadam: Bazadan javob keldi. Ma'lumot soni: " + (data ? data.length : 0));
+        // Bazani tekshirish - 5 soniya kutamiz, javob bo'lmasa skanerni yoqamiz
+        const { data, error } = await Promise.race([
+            _supabase.rpc('check_active_lesson', { inst_id: parseInt(currentInstId) }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ]);
 
-        if (data && data.length > 0) {
-            // Taymerni ko'rsatish...
-            document.querySelector('.qr-card').style.display = 'none';
-            document.getElementById('ticketResult').style.display = 'block';
-            // ... qolgan kodlar ...
-        } else {
-            alert("4-qadam: Dars yo'q, skanerni yoqaman");
+        if (error || !data || data.length === 0) {
+            // Dars yo'q yoki baza xato berdi - Skanerni yoqamiz
             document.querySelector('.qr-card').style.display = 'block';
             initScanner();
+        } else {
+            // Dars bor - Taymerni tiklaymiz
+            const lesson = data[0];
+            document.querySelector('.qr-card').style.display = 'none';
+            const ticketResultDiv = document.getElementById('ticketResult');
+            ticketResultDiv.style.display = 'block';
+
+            ticketResultDiv.innerHTML = `
+                <div class="timer-wrapper" style="background: #1a2634; color: white; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #3498db; margin-top: 10px;">
+                    <p style="color: #3498db; text-transform: uppercase;">MASHG'ULOT DAVOM ETMOQDA</p>
+                    <div id="countdown" style="font-size: 55px; font-weight: 800; font-family: monospace; margin: 15px 0;">00:00:00</div>
+                    <div style="border-top: 1px solid #34495e; margin: 15px 0;"></div>
+                    <div id="actionArea">
+                        <div class="car-tag" style="background: #f1c40f; color: #000; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 20px;">🚗 ${lesson.res_car_number}</div>
+                    </div>
+                </div>
+            `;
+            startCountdown(lesson.res_remaining_seconds, lesson.res_ticket_id);
         }
+
     } catch (err) {
-        alert("KATTA XATO: " + err.message);
+        console.error("Xatolik bo'ldi, lekin skaner yoqiladi:", err);
+        document.querySelector('.qr-card').style.display = 'block';
+        initScanner();
     }
 }
-// HAMMASINI BOSHLASH
 main();
