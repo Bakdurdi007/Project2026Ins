@@ -193,9 +193,11 @@ logoutBtn.addEventListener('click', () => {
 });
 
 async function main() {
+    alert("1-qadam: Dastur boshlandi");
     try {
         await loadInstructorData();
         const currentInstId = sessionStorage.getItem('instructor_id');
+        alert("2-qadam: ID topildi: " + currentInstId);
 
         if (!currentInstId) {
             document.querySelector('.qr-card').style.display = 'block';
@@ -209,9 +211,12 @@ async function main() {
             new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
         ]);
 
+        alert("3-qadam: Bazadan javob keldi. Ma'lumot soni: " + (data ? data.length : 0));
+
         if (error || !data || data.length === 0) {
             // Dars yo'q yoki baza xato berdi - Skanerni yoqamiz
             document.querySelector('.qr-card').style.display = 'block';
+            alert("4-qadam: Bazadan javob keldi. Ma'lumot soni: " + (data ? data.length : 0));
             initScanner();
         } else {
             // Dars bor - Taymerni tiklaymiz
@@ -219,7 +224,7 @@ async function main() {
             document.querySelector('.qr-card').style.display = 'none';
             const ticketResultDiv = document.getElementById('ticketResult');
             ticketResultDiv.style.display = 'block';
-
+            alert("4-qadam: Dars yo'q, skanerni yoqaman");
             ticketResultDiv.innerHTML = `
                 <div class="timer-wrapper" style="background: #1a2634; color: white; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #3498db; margin-top: 10px;">
                     <p style="color: #3498db; text-transform: uppercase;">MASHG'ULOT DAVOM ETMOQDA</p>
