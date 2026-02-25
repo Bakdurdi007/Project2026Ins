@@ -104,7 +104,7 @@ async function startLesson(ticketId) {
             showTimerUI(data[0]); // Taymerni bitta joydan chizamiz
         }
     } catch (err) {
-        showModal("Xatolik: " + err.message);
+        showModal("Xatolik: ");
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
@@ -215,7 +215,7 @@ async function finishLesson() {
         showModal("Mashg'ulot muvaffaqiyatli yakunlandi!");
         window.location.reload();
     } catch (err) {
-        showModal("Yakunlashda xatolik: " + err.message);
+        showModal("Yakunlashda xatolik: ");
         if (finishBtn) {
             finishBtn.disabled = false;
             finishBtn.innerText = "✅ Mashg'ulotni yakunlash";
