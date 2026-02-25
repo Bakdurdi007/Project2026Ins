@@ -103,6 +103,11 @@ async function startLesson(ticketId) {
             showTimerUI(data[0]); // Taymerni bitta joydan chizamiz
         }
     } catch (err) {
+        showModal({
+            title: 'Xatolik',
+            message: 'Xatolik yuz berdi',
+            type: 'error'
+        });
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
