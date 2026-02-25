@@ -63,10 +63,23 @@ async function handleTicket(ticketId) {
         <div class="ticket-info-row"><span>📚</span> <span class="info-label">Kurs:</span> <span class="info-value">${data.direction_category || '---'} min</span></div>
         <div class="ticket-info-row"><span>💰</span> <span class="info-label">Summa:</span> <span class="info-value">${data.payment_amount || '---'} min</span></div>
         <div class="ticket-info-row"><span>⌛</span> <span class="info-label">Vaqt:</span> <span class="info-value">${data.minute || '---'} min</span></div>
-        <div class="ticket-info-row"><span>📅</span> <span class="info-label">Sana:</span> <span class="info-value">${data.created_at || '---'} min</span></div>
+        <div class="ticket-info-row"><span>📅</span> <span class="info-label">Sana:</span> <span class="info-value">${formatMyDate(data.created_at) || '---'} min</span></div>
         <div class="ticket-info-row"><span>👨‍💻</span> <span class="info-label">Admin:</span> <span class="info-value">${data.admin_id || '---'} min</span></div>
         <button class="start-btn" onclick="startLesson('${data.id}')">▶ Mashg'ulotni boshlash</button>
     `;
+}
+
+function formatMyDate(dateString) {
+    const date = new Date(dateString);
+
+    // Har bir qismni alohida olamiz va 0 bilan to'ldiramiz (masalan: 2 -> 02)
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Oylar 0 dan boshlanadi
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 // Darsni boshlash tugmasi bosilganda
