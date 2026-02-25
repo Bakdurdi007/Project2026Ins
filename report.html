@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisobotlar | Instructor Panel</title>
+    <link rel="stylesheet" href="css/panel.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        if (sessionStorage.getItem('userAuthenticated') !== 'true') {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body>
+<div class="panel-container">
+    <nav class="navbar">
+        <div class="user-info">
+            <h1>Hisobotlar</h1>
+            <p class="status-text">Darslar statistikasi</p>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 20px; display: grid; gap: 15px;">
+        <div class="ticket-wrapper" style="max-width: 100%;">
+            <div class="info-label">Bugungi darslar</div>
+            <div class="token-value" style="font-size: 2rem;">12 ta</div>
+        </div>
+
+        <div class="ticket-wrapper" style="max-width: 100%; border-color: #2ecc71;">
+            <div class="info-label">Umumiy vaqt</div>
+            <div class="info-value" style="font-size: 1.5rem; color: #fff;">480 minut</div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="panel.html" class="nav-link">
+            <i class="fa-solid fa-qrcode"></i>
+            <span>Skaner</span>
+        </a>
+        <a href="clients.html" class="nav-link">
+            <i class="fa-solid fa-users"></i>
+            <span>Mijozlar</span>
+        </a>
+        <a href="report.html" class="nav-link active">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Hisobot</span>
+        </a>
+    </nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mijozlar | Instructor Panel</title>
+    <link rel="stylesheet" href="css/panel.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        if (sessionStorage.getItem('userAuthenticated') !== 'true') {
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body>
+<div class="panel-container">
+    <nav class="navbar">
+        <div class="user-info">
+            <h1>Mijozlar ro'yxati</h1>
+            <p class="status-text">Barcha o'quvchilaringiz</p>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 20px;">
+        <div id="clientsList" class="ticket-wrapper" style="max-width: 100%; border-color: rgba(255,255,255,0.1);">
+            <p style="text-align: center; color: var(--text-gray);">Yuklanmoqda...</p>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="panel.html" class="nav-link">
+            <i class="fa-solid fa-qrcode"></i>
+            <span>Skaner</span>
+        </a>
+        <a href="clients.html" class="nav-link active">
+            <i class="fa-solid fa-users"></i>
+            <span>Mijozlar</span>
+        </a>
+        <a href="report.html" class="nav-link">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Hisobot</span>
+        </a>
+    </nav>
+</div>
+</body>
+</html>

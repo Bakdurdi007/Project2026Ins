@@ -221,6 +221,51 @@ body { background-color: var(--bg-dark); color: var(--text-white); }
 
 .icon-btn:active { transform: scale(0.9); opacity: 0.8; }
 
+/* Footer Navigatsiya */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: var(--card-bg);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone notch uchun */
+    z-index: 2000;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    transition: 0.3s ease;
+    flex: 1;
+}
+
+.nav-link i {
+    font-size: 1.3rem;
+}
+
+.nav-link.active {
+    color: var(--online-green);
+}
+
+.nav-link:active {
+    transform: scale(0.9);
+}
+
+/* Sahifalar kontenti footer ostida qolib ketmasligi uchun */
+.panel-container {
+    padding-bottom: 90px;
+}
+
 /* Mobil qurilmalar uchun maxsus */
 @media (max-width: 480px) {
     .navbar { padding: 12px 15px; }
