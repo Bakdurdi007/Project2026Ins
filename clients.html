@@ -8,40 +8,73 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
+        // Xavfsizlik tekshiruvi
         if (sessionStorage.getItem('userAuthenticated') !== 'true') {
             window.location.replace('index.html');
         }
     </script>
+    <style>
+        .container { padding: 20px; padding-bottom: 90px; }
+
+        /* Filter tugmalari dizayni */
+        .filter-tabs { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; background: #0b1426; padding: 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .filter-btn { flex: 1; padding: 10px 5px; background: transparent; color: var(--text-gray); border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.3s; text-align: center; }
+        .filter-btn.active { background: #3498db; color: #fff; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
+
+        /* Jadval dizayni */
+        .table-responsive { width: 100%; overflow-x: auto; background: var(--card-bg); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; text-align: left; }
+        th { background: #0b1426; color: var(--text-gray); padding: 15px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-white); font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        .empty-state { text-align: center; padding: 30px; color: var(--text-gray); }
+        .minute-badge { background: #2ecc71; color: #000; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
+    </style>
 </head>
 <body>
 <div class="panel-container">
     <nav class="navbar">
         <div class="user-info">
             <h1>Mijozlar ro'yxati</h1>
-            <p class="status-text">Barcha o'quvchilaringiz</p>
+            <p class="status-text">O'tilgan darslar tarixi</p>
         </div>
     </nav>
 
-    <div class="container" style="padding: 20px;">
-        <div id="clientsList" class="ticket-wrapper" style="max-width: 100%; border-color: rgba(255,255,255,0.1);">
-            <p style="text-align: center; color: var(--text-gray);">Yuklanmoqda...</p>
+    <div class="container">
+        <div class="filter-tabs">
+            <button class="filter-btn active" onclick="loadClients('day', this)">1 kunlik</button>
+            <button class="filter-btn" onclick="loadClients('week', this)">1 haftalik</button>
+            <button class="filter-btn" onclick="loadClients('month', this)">1 oylik</button>
+            <button class="filter-btn" onclick="loadClients('year', this)">1 yillik</button>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Mijoz</th>
+                    <th>Sana</th>
+                    <th>Min</th>
+                </tr>
+                </thead>
+                <tbody id="clientsTableBody">
+                <tr>
+                    <td colspan="4" class="empty-state">Ma'lumotlar yuklanmoqda...</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-link">
-            <i class="fa-solid fa-qrcode"></i>
-            <span>Skaner</span>
-        </a>
-        <a href="clients.html" class="nav-link active">
-            <i class="fa-solid fa-users"></i>
-            <span>Mijozlar</span>
-        </a>
-        <a href="report.html" class="nav-link">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Hisobot</span>
-        </a>
+        <a href="panel.html" class="nav-link"><i class="fa-solid fa-qrcode"></i><span>Skaner</span></a>
+        <a href="clients.html" class="nav-link active"><i class="fa-solid fa-users"></i><span>Mijozlar</span></a>
+        <a href="report.html" class="nav-link"><i class="fa-solid fa-chart-line"></i><span>Hisobot</span></a>
     </nav>
 </div>
+<script src="js/clients.js"></script>
 </body>
 </html>
