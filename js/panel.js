@@ -59,12 +59,12 @@ async function handleTicket(ticketId) {
         <div class="ticket-info-row"><span>🔑</span> <span class="info-label">Navbat:</span> <span class="token-value">${data.id || '---'}</span></div>       
         <div class="ticket-info-row"><span>👤</span> <span class="info-label">Ism:</span> <span class="info-value">${data.full_name || 'Noma`lum'}</span></div>
         <div class="ticket-info-row"><span>🏢</span> <span class="info-label">Markaz:</span> <span class="info-value">${data.centers ? data.centers.name : 'Topilmadi'}</span></div>
-        <div class="ticket-info-row"><span>👥</span> <span class="info-label">Guruh:</span> <span class="info-value">${data.group || '---'} min</span></div>
-        <div class="ticket-info-row"><span>📚</span> <span class="info-label">Kurs:</span> <span class="info-value">${data.direction_category || '---'} min</span></div>
-        <div class="ticket-info-row"><span>💰</span> <span class="info-label">Summa:</span> <span class="info-value">${data.payment_amount || '---'} min</span></div>
+        <div class="ticket-info-row"><span>👥</span> <span class="info-label">Guruh:</span> <span class="info-value">${data.group || '---'}</span></div>
+        <div class="ticket-info-row"><span>📚</span> <span class="info-label">Kurs:</span> <span class="info-value">${data.direction_category || '---'}</span></div>
+        <div class="ticket-info-row"><span>💰</span> <span class="info-label">Summa:</span> <span class="info-value">${data.payment_amount || '---'} so'm</span></div>
         <div class="ticket-info-row"><span>⌛</span> <span class="info-label">Vaqt:</span> <span class="info-value">${data.minute || '---'} min</span></div>
-        <div class="ticket-info-row"><span>📅</span> <span class="info-label">Sana:</span> <span class="info-value">${formatMyDate(data.created_at) || '---'} min</span></div>
-        <div class="ticket-info-row"><span>👨‍💻</span> <span class="info-label">Admin:</span> <span class="info-value">${data.admin_id || '---'} min</span></div>
+        <div class="ticket-info-row"><span>📅</span> <span class="info-label">Sana:</span> <span class="info-value">${formatMyDate(data.created_at) || '---'}</span></div>
+        <div class="ticket-info-row"><span>👨‍💻</span> <span class="info-label">Admin:</span> <span class="info-value">${data.admin_id || '---'}</span></div>
         <button class="start-btn" onclick="startLesson('${data.id}')">▶ Mashg'ulotni boshlash</button>
     `;
 }
