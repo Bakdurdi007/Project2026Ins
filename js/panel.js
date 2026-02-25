@@ -103,6 +103,13 @@ async function startLesson(ticketId) {
             showTimerUI(data[0]); // Taymerni bitta joydan chizamiz
         }
     } catch (err) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Xatolik!',
+            text: err.message, // "Bu chek allaqachon skanerlangan va faol emas!"
+            confirmButtonText: 'Tushunarli'
+        });
+
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
