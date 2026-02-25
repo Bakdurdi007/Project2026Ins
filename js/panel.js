@@ -45,7 +45,7 @@ async function handleTicket(ticketId) {
         .single();
 
     if (error || !data) {
-        alert("Xato: Ticket topilmadi!");
+        showModal("Xato: Ticket topilmadi!");
         return;
     }
 
@@ -104,7 +104,7 @@ async function startLesson(ticketId) {
             showTimerUI(data[0]); // Taymerni bitta joydan chizamiz
         }
     } catch (err) {
-        alert("Xatolik: " + err.message);
+        showModal("Xatolik: " + err.message);
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
@@ -200,7 +200,7 @@ async function finishLesson() {
 
     const currentInstId = sessionStorage.getItem('instructor_id');
     if (!currentInstId) {
-        alert("Xatolik: Instruktor tizimga kirmagan!");
+        showModal("Xatolik: Instruktor tizimga kirmagan!");
         return;
     }
 
@@ -212,10 +212,10 @@ async function finishLesson() {
 
         if (error) throw error;
 
-        alert("Mashg'ulot muvaffaqiyatli yakunlandi!");
+        showModal("Mashg'ulot muvaffaqiyatli yakunlandi!");
         window.location.reload();
     } catch (err) {
-        alert("Yakunlashda xatolik: " + err.message);
+        showModal("Yakunlashda xatolik: " + err.message);
         if (finishBtn) {
             finishBtn.disabled = false;
             finishBtn.innerText = "✅ Mashg'ulotni yakunlash";
