@@ -45,11 +45,6 @@ async function handleTicket(ticketId) {
         .single();
 
     if (error || !data) {
-        showModal({
-            title: 'Xatolik',
-            message: 'Ticket topilmadi yoki xato yuz berdi!',
-            type: 'error'
-        });
         return;
     }
 
@@ -108,11 +103,6 @@ async function startLesson(ticketId) {
             showTimerUI(data[0]); // Taymerni bitta joydan chizamiz
         }
     } catch (err) {
-        showModal({
-            title: 'Xatolik',
-            message: 'Xatolik yuz berdi',
-            type: 'error'
-        });
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
@@ -208,11 +198,6 @@ async function finishLesson() {
 
     const currentInstId = sessionStorage.getItem('instructor_id');
     if (!currentInstId) {
-        showModal({
-            title: 'Xatolik',
-            message: 'Xatolik: Instruktor tizimga kirmagan!',
-            type: 'error'
-        });
         return;
     }
 

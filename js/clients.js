@@ -70,11 +70,6 @@ async function loadClients(period, btnElement) {
         tbody.innerHTML = html;
 
     } catch (err) {
-        showModal({
-            title: 'Xatolik',
-            message: 'Xatolik yuz berdi.',
-            type: 'error'
-        });
         tbody.innerHTML = `<tr><td colspan="4" class="empty-state" style="color: #e74c3c;">Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.</td></tr>`;
     }
 }

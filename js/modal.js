@@ -66,11 +66,3 @@ logoutBtn.addEventListener('click', () => {
         }
     });
 });
-
-// 2. Mashg'ulot yakunlanganda:
-// alert("Mashg'ulot muvaffaqiyatli yakunlandi!") o'rniga:
-showModal({
-    title: 'Muvaffaqiyatli',
-    message: "Mashg'ulot muvaffaqiyatli yakunlandi!",
-    type: 'success'
-});
