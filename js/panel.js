@@ -45,7 +45,11 @@ async function handleTicket(ticketId) {
         .single();
 
     if (error || !data) {
-        showModal("Xato: Ticket topilmadi!");
+        showModal({
+            title: 'Xatolik',
+            message: 'Ticket topilmadi yoki xato yuz berdi!',
+            type: 'error'
+        });
         return;
     }
 
@@ -104,7 +108,11 @@ async function startLesson(ticketId) {
             showTimerUI(data[0]); // Taymerni bitta joydan chizamiz
         }
     } catch (err) {
-        showModal("Xatolik: ");
+        showModal({
+            title: 'Xatolik',
+            message: 'Xatolik yuz berdi',
+            type: 'error'
+        });
         startBtn.disabled = false;
         startBtn.innerText = "▶ Mashg'ulotni boshlash";
     }
@@ -200,7 +208,11 @@ async function finishLesson() {
 
     const currentInstId = sessionStorage.getItem('instructor_id');
     if (!currentInstId) {
-        showModal("Xatolik: Instruktor tizimga kirmagan!");
+        showModal({
+            title: 'Xatolik',
+            message: 'Xatolik: Instruktor tizimga kirmagan!',
+            type: 'error'
+        });
         return;
     }
 
@@ -212,10 +224,13 @@ async function finishLesson() {
 
         if (error) throw error;
 
-        showModal("Mashg'ulot muvaffaqiyatli yakunlandi!");
         window.location.reload();
     } catch (err) {
-        showModal("Yakunlashda xatolik: ");
+        showModal({
+            title: 'Xatolik',
+            message: 'Yakunlashda xatolik.',
+            type: 'error'
+        });
         if (finishBtn) {
             finishBtn.disabled = false;
             finishBtn.innerText = "✅ Mashg'ulotni yakunlash";
@@ -224,10 +239,15 @@ async function finishLesson() {
 }
 
 logoutBtn.addEventListener('click', () => {
-    if (confirm("Chiqmoqchimisiz?")) {
-        sessionStorage.clear();
-        window.location.replace('index.html');
-    }
+    showModal({
+        title: 'Chiqish',
+        message: 'Tizimdan chiqishni tasdiqlaysizmi?',
+        type: 'confirm',
+        onConfirm: () => {
+            sessionStorage.clear();
+            window.location.replace('index.html');
+        }
+    });
 });
 
 main();
