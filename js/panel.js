@@ -103,10 +103,13 @@ async function startLesson(ticketId) {
             showTimerUI(data[0]); // Taymerni bitta joydan chizamiz
         }
     } catch (err) {
+        // Agar SQL-dan aniq xabar kelsa o'shani, aks holda umumiy xabarni chiqaramiz
+        const errorText = err.message || "Kutilmagan xatolik yuz berdi";
+
         Swal.fire({
             icon: 'error',
             title: 'Xatolik!',
-            text: err.message, // "Bu chek allaqachon skanerlangan va faol emas!"
+            text: errorText,
             confirmButtonText: 'Tushunarli'
         });
 
