@@ -12,42 +12,38 @@
             window.location.replace('index.html');
         }
     </script>
+    <style>
+        .report-grid { display: grid; grid-template-columns: 1fr; gap: 15px; padding: 15px; }
+        @media (min-width: 768px) { .report-grid { grid-template-columns: 1fr 1fr; } }
+
+        .report-card { background: var(--card-bg); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .report-card h3 { color: var(--text-gray); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .stat-val { font-weight: bold; color: var(--text-white); }
+        .stat-label { color: var(--text-gray); display: flex; align-items: center; gap: 8px; }
+        .money { color: var(--online-green); }
+        .cashback-card { background: linear-gradient(135deg, #1a2333 0%, #2c3e50 100%); border: 1px solid var(--online-green); }
+    </style>
 </head>
 <body>
 <div class="panel-container">
     <nav class="navbar">
         <div class="user-info">
-            <h1>Hisobotlar</h1>
-            <p class="status-text">Darslar statistikasi</p>
+            <h1 id="instructorName">Hisobotlar</h1>
+            <div class="status-indicator"><span class="dot"></span><span class="status-text">Statistika</span></div>
         </div>
     </nav>
 
-    <div class="container" style="padding: 20px; display: grid; gap: 15px;">
-        <div class="ticket-wrapper" style="max-width: 100%;">
-            <div class="info-label">Bugungi darslar</div>
-            <div class="token-value" style="font-size: 2rem;">12 ta</div>
-        </div>
-
-        <div class="ticket-wrapper" style="max-width: 100%; border-color: #2ecc71;">
-            <div class="info-label">Umumiy vaqt</div>
-            <div class="info-value" style="font-size: 1.5rem; color: #fff;">480 minut</div>
-        </div>
+    <div id="reportContainer" class="report-grid">
+        <p style="text-align: center; grid-column: 1/-1;">Yuklanmoqda...</p>
     </div>
 
     <nav class="bottom-nav">
-        <a href="panel.html" class="nav-link">
-            <i class="fa-solid fa-qrcode"></i>
-            <span>Skaner</span>
-        </a>
-        <a href="clients.html" class="nav-link">
-            <i class="fa-solid fa-users"></i>
-            <span>Mijozlar</span>
-        </a>
-        <a href="report.html" class="nav-link active">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Hisobot</span>
-        </a>
+        <a href="panel.html" class="nav-link"><i class="fa-solid fa-qrcode"></i><span>Skaner</span></a>
+        <a href="clients.html" class="nav-link"><i class="fa-solid fa-users"></i><span>Mijozlar</span></a>
+        <a href="report.html" class="nav-link active"><i class="fa-solid fa-chart-line"></i><span>Hisobot</span></a>
     </nav>
 </div>
+<script src="js/report.js"></script>
 </body>
 </html>
