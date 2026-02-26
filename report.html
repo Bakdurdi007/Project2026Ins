@@ -17,13 +17,41 @@
         .report-grid { display: grid; grid-template-columns: 1fr; gap: 15px; padding: 15px; }
         @media (min-width: 768px) { .report-grid { grid-template-columns: 1fr 1fr; } }
 
-        .report-card { background: var(--card-bg); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .report-card h3 { color: var(--text-gray); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .report-card { background: var(--card-bg, #1e293b); border-radius: 15px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .report-card h3 { color: var(--text-gray, #94a3b8); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .stat-val { font-weight: bold; color: var(--text-white); }
-        .stat-label { color: var(--text-gray); display: flex; align-items: center; gap: 8px; }
-        .money { color: var(--online-green); }
-        .cashback-card { background: linear-gradient(135deg, #1a2333 0%, #2c3e50 100%); border: 1px solid var(--online-green); }
+        .stat-val { font-weight: bold; color: var(--text-white, #ffffff); }
+        .stat-label { color: var(--text-gray, #94a3b8); display: flex; align-items: center; gap: 8px; }
+        .money { color: var(--online-green, #22c55e); }
+        .cashback-card { background: linear-gradient(135deg, #1a2333 0%, #2c3e50 100%); border: 1px solid var(--online-green, #22c55e); }
+
+        /* Tugmalar dizayni */
+        .tabs-container {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.6); /* To'q fon */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 5px;
+            margin: 15px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            color: var(--text-gray, #94a3b8);
+            border: none;
+            padding: 10px 5px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s ease;
+            text-align: center;
+        }
+        .tab-btn.active {
+            background: #3ba1e3; /* Rasmga mos ochiq ko'k */
+            color: #ffffff;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -34,6 +62,13 @@
             <div class="status-indicator"><span class="dot"></span><span class="status-text">Statistika</span></div>
         </div>
     </nav>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" data-type="daily">1 kunlik</button>
+        <button class="tab-btn" data-type="weekly">1 haftalik</button>
+        <button class="tab-btn" data-type="monthly">1 oylik</button>
+        <button class="tab-btn" data-type="annual">1 yillik</button>
+    </div>
 
     <div id="reportContainer" class="report-grid">
         <p style="text-align: center; grid-column: 1/-1;">Yuklanmoqda...</p>
