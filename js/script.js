@@ -1,4 +1,4 @@
-// Supabase sozlamalari (O'zingiznikini qo'ying)
+// Supabase sozlamalari
 const supabaseUrl = 'https://wczijkqackrmzssfgdqm.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indjemlqa3FhY2tybXpzc2ZnZHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1OTk4MzksImV4cCI6MjA4NzE3NTgzOX0.ooRafiR7nR08d1f0_XEyX19AXPHRaOzjurNYw7SvZwI';
 const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -13,32 +13,51 @@ loginForm.addEventListener('submit', async (e) => {
 
     // Kiritilgan qiymat aynan 4 ta raqamdan iboratligini tekshirish
     if (pinInput.length !== 4 || isNaN(pinInput)) {
-        messageDiv.innerText = "Iltimos, 4 xonali kod kiriting! (masalan: 0012)";
+        messageDiv.style.color = "red";
+        messageDiv.innerText = "Iltimos, 4 xonali kod kiriting! (masalan: 0015)";
         return;
     }
 
-    // '0015' kabi yozuvni son formatiga (15) o'tkazamiz
     const instructorId = parseInt(pinInput, 10);
-    messageDiv.innerText = "Tekshirilmoqda..."; // Yuklanish jarayoni
+    messageDiv.style.color = "orange";
+    messageDiv.innerText = "Tekshirilmoqda...";
 
-    // Instructors jadvalidan ID bo'yicha tekshirish
-    const { data, error } = await _supabase
-        .from('instructors')
-        .select('*')
-        .eq('id', instructorId)
-        .single();
+    try {
+        // Instructors jadvalidan ID bo'yicha ma'lumotlarni olish
+        const { data, error } = await _supabase
+            .from('instructors')
+            .select('*')
+            .eq('id', instructorId)
+            .single();
 
-    if (error || !data) {
-        messageDiv.innerText = "Bunday ID ga ega instruktor topilmadi!";
-    } else {
-        // Muvaffaqiyatli kirish
-        sessionStorage.setItem('userAuthenticated', 'true');
-        // Agar bazangizda ism-sharif maydoni bo'lsa (masalan 'full_name'), uni ham saqlang
-        sessionStorage.setItem('userName', data.login || `Instructor #${data.id}`);
-        sessionStorage.setItem('instructor_id', data.id);
+        if (error || !data) {
+            messageDiv.style.color = "red";
+            messageDiv.innerText = "Bunday ID ga ega instruktor topilmadi!";
+        } else {
+            // Sessiyaga ma'lumotlarni saqlash
+            sessionStorage.setItem('userAuthenticated', 'true');
+            sessionStorage.setItem('userName', data.login || `Instructor #${data.id}`);
+            sessionStorage.setItem('instructor_id', data.id);
+            sessionStorage.setItem('userSource', data.source); // Source qiymatini ham saqlab qo'yamiz
 
-        messageDiv.style.color = "green";
-        messageDiv.innerText = "Muvaffaqiyatli! Yo'naltirilmoqda...";
-        window.location.replace('panel.html');
+            messageDiv.style.color = "green";
+            messageDiv.innerText = "Muvaffaqiyatli! Yo'naltirilmoqda...";
+
+            // --- YO'NALTIRISH MANTIQI ---
+            if (data.source === 'hamkor') {
+                // Agar source "hamkor" bo'lsa
+                window.location.replace('clients_h.html');
+            } else if (data.source === 'filial') {
+                // Agar source "filial" bo'lsa
+                window.location.replace('panel.html');
+            } else {
+                // Agar source kutilmagan boshqa qiymat bo'lsa (ehtiyot chorasi)
+                window.location.replace('panel.html');
+            }
+        }
+    } catch (err) {
+        messageDiv.style.color = "red";
+        messageDiv.innerText = "Tizimda xatolik yuz berdi.";
+        console.error(err);
     }
 });
