@@ -12,20 +12,17 @@
 <div class="login-container">
     <form id="loginForm" class="login-card">
         <h2>Kirish</h2>
-        <p>Tizimga kirish uchun ma'lumotlarni kiriting</p>
+        <p>Tizimga kirish uchun 4 xonali ID kodni kiriting</p>
 
         <div class="input-group">
-            <input type="text" id="login" placeholder="998991234567" required>
-        </div>
-
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Parol" required>
+            <input type="text" id="instructorPin" placeholder="0015" maxlength="4" pattern="\d{4}" autocomplete="off" required>
         </div>
 
         <button type="submit" id="loginBtn">Kirish</button>
         <div id="message"></div>
     </form>
 </div>
+
 <div id="universalModal" class="modal-overlay" style="display: none;">
     <div class="modal-box">
         <div id="modalIcon" style="font-size: 3rem; margin-bottom: 15px;"></div>
@@ -35,6 +32,7 @@
         </div>
     </div>
 </div>
+
 <script src="js/modal.js"></script>
 <script src="js/script.js"></script>
 </body>
