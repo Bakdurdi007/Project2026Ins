@@ -16,77 +16,117 @@ async function loadReports() {
     const container = document.getElementById('reportContainer');
 
     try {
-        // 1. Reports ma'lumotlarini olish
-        const { data: report, error: rError } = await _supabase
-            .from('reports')
-            .select('*')
-            .eq('instructor_id', instId)
-            .single();
+        // 1. Vaqt chegaralarini belgilaymiz
+        const now = new Date();
 
-        // 2. Instructor ma'lumotlarini olish
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+        const last7Days = new Date();
+        last7Days.setDate(now.getDate() - 7);
+        const startOfWeekly = last7Days.toISOString();
+
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        const startOfYear = new Date(now.getFullYear(), 0, 1).toISOString();
+
+        // 2. Bazadan aynan shu instruktorning barcha cheklarini olamiz
+        const { data: tickets, error: tError } = await _supabase
+            .from('tickets')
+            .select('actual_minute, lesson_stop_time')
+            .eq('instructor_id', instId);
+
+        // 3. Instruktor ma'lumotini olish (stavka va source uchun)
         const { data: instructor, error: iError } = await _supabase
             .from('instructors')
-            .select('source')
+            .select('source, id')
             .eq('id', instId)
             .single();
 
-        if (rError || iError) throw new Error("Ma'lumot topilmadi");
+        if (tError || iError) throw new Error("Ma'lumot yuklashda xatolik");
 
-        // Kelgan datalarni global o'zgaruvchiga saqlaymiz
-        cachedReportData = report;
+        // Stavkalarni belgilaymiz (Admin panel bilan bir xil bo'lishi kerak)
+        const MIN_RATE = 40000; // 12000 min gacha
+        const MAX_RATE = 45000; // 12000 min dan oshsa
+
+        // Yordamchi hisoblash funksiyasi
+        const calculateStats = (filteredTickets) => {
+            const totalMin = filteredTickets.reduce((sum, t) => sum + (t.actual_minute || 0), 0);
+            let salary = 0;
+            if (totalMin > 0 && totalMin <= 12000) {
+                salary = (totalMin / 60) * MIN_RATE;
+            } else if (totalMin > 12000) {
+                salary = (totalMin / 60) * MAX_RATE;
+            }
+            return { min: totalMin, money: salary };
+        };
+
+        // 4. Har bir vaqt oralig'i uchun ma'lumotlarni filtrlash va hisoblash
+        const daily = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfDay));
+        const weekly = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfWeekly));
+        const monthly = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfMonth));
+        const annual = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfYear));
+
+        // 5. Global keshga saqlaymiz
+        cachedReportData = {
+            daily_minute: daily.min,
+            daily_money: daily.money,
+            weekly_minute: weekly.min,
+            weekly_money: weekly.money,
+            monthly_minute: monthly.min,
+            monthly_money: monthly.money,
+            annual_minute: annual.min,
+            annual_money: annual.money,
+            cashback_money: 0 // Agar bazada cashback bo'lsa, bu yerga ulanadi
+        };
+
         cachedInstructorSource = instructor.source;
 
-        // Boshlang'ich holatda 1 kunlik va Cashbackni chizib berish
+        // Birinchi bo'lib kunlik hisobotni ko'rsatish
         renderReport('daily');
 
     } catch (err) {
-        container.innerHTML = `<p style="color:red; text-align:center;">Xatolik yuz berdi yoki ma'lumot mavjud emas.</p>`;
+        console.error("Xatolik:", err);
+        container.innerHTML = `<p style="color:red; text-align:center;">Ma'lumotlarni hisoblashda xatolik yuz berdi.</p>`;
     }
 }
 
 function renderReport(type) {
     const container = document.getElementById('reportContainer');
-
-    // Agar data hali kelmagan bo'lsa, hech narsa qilmaydi
     if (!cachedReportData) return;
 
     let title, min, money;
 
-    // Tugma turiga qarab kerakli ma'lumotlarni ajratib olamiz
     switch(type) {
         case 'daily':
-            title = '1 Kunlik Hisobot';
+            title = 'Bugungi Hisobot';
             min = cachedReportData.daily_minute;
             money = cachedReportData.daily_money;
             break;
         case 'weekly':
-            title = '1 Haftalik Hisobot';
+            title = 'Oxirgi 7 kunlik';
             min = cachedReportData.weekly_minute;
             money = cachedReportData.weekly_money;
             break;
         case 'monthly':
-            title = '1 Oylik Hisobot';
+            title = 'Shu oylik hisobot';
             min = cachedReportData.monthly_minute;
             money = cachedReportData.monthly_money;
             break;
         case 'annual':
-            title = '1 Yillik Hisobot';
+            title = 'Yillik jami hisobot';
             min = cachedReportData.annual_minute;
             money = cachedReportData.annual_money;
             break;
     }
 
-    // Tanlangan vaqt hisobotini yaratamiz
     let html = createCard(title, min, money);
 
-    // Cashback doim chiqib turadi (agar instructor "hamkor" bo'lsa)
     if (cachedInstructorSource === 'hamkor') {
         html += `
             <div class="report-card cashback-card">
                 <h3>🎁 Cashback Hisoboti</h3>
                 <div class="stat-row">
                     <span class="stat-label"><i class="fa-solid fa-gift"></i> Jamg'arma:</span>
-                    <span class="stat-val money">${cachedReportData.cashback_money.toLocaleString()} so'm</span>
+                    <span class="stat-val money">${(cachedReportData.cashback_money || 0).toLocaleString()} so'm</span>
                 </div>
             </div>
         `;
