@@ -143,10 +143,12 @@ function createCard(title, min, money) {
                 <span class="stat-label"><i class="fa-solid fa-clock"></i> Ish vaqti:</span>
                 <span class="stat-val">${min || 0} min</span>
             </div>
+            <!--
             <div class="stat-row">
                 <span class="stat-label"><i class="fa-solid fa-wallet"></i> Daromad:</span>
                 <span class="stat-val money">${(money || 0).toLocaleString()} so'm</span>
             </div>
+            -->
         </div>
     `;
 }
