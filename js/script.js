@@ -5,7 +5,6 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 const loginForm = document.getElementById('loginForm');
 const messageDiv = document.getElementById('message');
-const loginBtn = document.getElementById('loginBtn');
 
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -14,20 +13,14 @@ loginForm.addEventListener('submit', async (e) => {
 
     // Kiritilgan qiymat aynan 4 ta raqamdan iboratligini tekshirish
     if (pinInput.length !== 4 || isNaN(pinInput)) {
-        showModal({
-            title: 'Xatolik',
-            message: 'Iltimos, 4 xonali ID kod kiriting! (masalan: 0015)',
-            type: 'error'
-        });
+        messageDiv.style.color = "red";
+        messageDiv.innerText = "Iltimos, 4 xonali kod kiriting! (masalan: 0015)";
         return;
     }
 
     const instructorId = parseInt(pinInput, 10);
-
-    // Tugmani bloklaymiz va matnini o'zgartiramiz
-    loginBtn.disabled = true;
-    loginBtn.innerText = "Tekshirilmoqda...";
-    messageDiv.innerText = "";
+    messageDiv.style.color = "orange";
+    messageDiv.innerText = "Tekshirilmoqda...";
 
     try {
         // Instructors jadvalidan ID bo'yicha ma'lumotlarni olish
@@ -38,46 +31,33 @@ loginForm.addEventListener('submit', async (e) => {
             .single();
 
         if (error || !data) {
-            showModal({
-                title: 'Topilmadi',
-                message: 'Bunday ID ga ega instruktor topilmadi!',
-                type: 'error'
-            });
-            loginBtn.disabled = false;
-            loginBtn.innerText = "Kirish";
+            messageDiv.style.color = "red";
+            messageDiv.innerText = "Bunday ID ga ega instruktor topilmadi!";
         } else {
-            // SessiYaga ma'lumotlarni saqlash
+            // Sessiyaga ma'lumotlarni saqlash
             sessionStorage.setItem('userAuthenticated', 'true');
-            // Agar ism-familiyasi bo'lsa shuni, yo'qsa loginini olamiz
-            sessionStorage.setItem('userName', data.full_name || data.login || `Instruktor #${data.id}`);
+            sessionStorage.setItem('userName', data.login || `Instructor #${data.id}`);
             sessionStorage.setItem('instructor_id', data.id);
-            sessionStorage.setItem('userSource', data.source);
-
-            // JORIY FILIAL ID SINI SAQLASH (MUHIM!)
-            sessionStorage.setItem('branch_id', data.branch_id);
+            sessionStorage.setItem('userSource', data.source); // Source qiymatini ham saqlab qo'yamiz
 
             messageDiv.style.color = "green";
             messageDiv.innerText = "Muvaffaqiyatli! Yo'naltirilmoqda...";
 
             // --- YO'NALTIRISH MANTIQI ---
-            setTimeout(() => {
-                if (data.source === 'hamkor') {
-                    // Agar source "hamkor" bo'lsa
-                    window.location.replace('clients_h.html');
-                } else {
-                    // Qolgan barcha holatlarda (filial)
-                    window.location.replace('panel.html');
-                }
-            }, 1000);
+            if (data.source === 'hamkor') {
+                // Agar source "hamkor" bo'lsa
+                window.location.replace('clients_h.html');
+            } else if (data.source === 'filial') {
+                // Agar source "filial" bo'lsa
+                window.location.replace('panel.html');
+            } else {
+                // Agar source kutilmagan boshqa qiymat bo'lsa (ehtiyot chorasi)
+                window.location.replace('panel.html');
+            }
         }
     } catch (err) {
-        showModal({
-            title: 'Tizim xatosi',
-            message: 'Internet aloqasini tekshiring yoki keyinroq urinib ko\'ring.',
-            type: 'error'
-        });
+        messageDiv.style.color = "red";
+        messageDiv.innerText = "Tizimda xatolik yuz berdi.";
         console.error(err);
-        loginBtn.disabled = false;
-        loginBtn.innerText = "Kirish";
     }
 });

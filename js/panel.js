@@ -23,18 +23,11 @@ const qrConfig = { fps: 10, qrbox: {width: 220, height: 220}, aspectRatio: 1.0 }
 let activeCountdownInterval = null; // Taymer ustma-ust tushmasligi uchun
 
 async function loadInstructorData() {
-    const instId = sessionStorage.getItem('instructor_id'); // Login emas, ID dan foydalanamiz
-    if (!instId) return;
+    const userLogin = sessionStorage.getItem('userName');
+    if (!userLogin) return;
 
-    const {data, error} = await _supabase
-        .from('instructors')
-        .select('full_name')
-        .eq('id', parseInt(instId)) // ID aniq bitta odamni topadi
-        .single();
-
-    if (data && !error) {
-        instructorNameElem.innerText = data.full_name;
-    }
+    const {data, error} = await _supabase.from('instructors').select('full_name').eq('login', userLogin).single();
+    instructorNameElem.innerText = (data && !error) ? data.full_name : "Instructor";
 }
 
 function initScanner() {
@@ -44,7 +37,6 @@ function initScanner() {
     }).catch(err => console.error("Kamera xatosi:", err));
 }
 
-/*
 async function handleTicket(ticketId) {
     const {data, error} = await _supabase
         .from('tickets')
@@ -61,62 +53,10 @@ async function handleTicket(ticketId) {
     document.querySelector('.qr-card').style.display = 'none';
     const resultDiv = document.getElementById('ticketResult');
     resultDiv.style.display = 'block';
-    resultDiv.innerHTML = `
-        <div class="ticket-header">Mashg'ulot ma'lumotlari:</div>
-        <div class="ticket-info-row"><span>🔑</span> <span class="info-label">Navbat:</span> <span class="token-value">${data.id || '---'}</span></div>
-        <div class="ticket-info-row"><span>👤</span> <span class="info-label">Ism:</span> <span class="info-value">${data.full_name || 'Noma`lum'}</span></div>
-        <div class="ticket-info-row"><span>🏢</span> <span class="info-label">Markaz:</span> <span class="info-value">${data.centers ? data.centers.name : 'Topilmadi'}</span></div>
-        <div class="ticket-info-row"><span>👥</span> <span class="info-label">Guruh:</span> <span class="info-value">${data.group || '---'}</span></div>
-        <div class="ticket-info-row"><span>📚</span> <span class="info-label">Kurs:</span> <span class="info-value">${data.direction_category || '---'}</span></div>
-        <div class="ticket-info-row"><span>💰</span> <span class="info-label">Summa:</span> <span class="info-value">${data.payment_amount || '---'} so'm</span></div>
-        <div class="ticket-info-row"><span>⌛</span> <span class="info-label">Vaqt:</span> <span class="info-value">${data.minute || '---'} min</span></div>
-        <div class="ticket-info-row"><span>📅</span> <span class="info-label">Sana:</span> <span class="info-value">${formatMyDate(data.created_at) || '---'}</span></div>
-        <div class="ticket-info-row"><span>👨‍💻</span> <span class="info-label">Admin:</span> <span class="info-value">${data.admin_id || '---'}</span></div>
-        <button class="start-btn" onclick="startLesson('${data.id}')">▶ Mashg'ulotni boshlash</button>
-    `;
-}
-*/
-
-async function handleTicket(ticketId) {
-    // 1. Sessiyadan joriy instruktorning filialini olamiz
-    const currentBranchId = sessionStorage.getItem('branch_id');
-
-    // 2. Chiptani qidiramiz (ID va Filial bo'yicha)
-    const {data, error} = await _supabase
-        .from('tickets')
-        .select(`*, centers:center_name ( name ), admins:admin_id ( admin_fullname )`)
-        .eq('id', ticketId)
-        .eq('branch_id', currentBranchId) // MUHIM YANGILIK: Faqat o'z filialidagi chiptani o'qish
-        .single();
-
-    // 3. Agar chipta topilmasa yoki boshqa filialniki bo'lsa
-    if (error || !data) {
-        showModal({
-            title: 'Topilmadi!',
-            message: 'Bu chipta topilmadi yoki boshqa filialga/markazga tegishli!',
-            type: 'error'
-        });
-
-        // Skanerni birozdan keyin yana ishlashiga ruxsat berish mumkin
-        setTimeout(() => {
-            if (html5QrCode.isScanning) {
-                html5QrCode.resume();
-            }
-        }, 3000);
-        return;
-    }
-
-    try { await html5QrCode.stop(); } catch (err) {}
-
-    document.querySelector('.qr-card').style.display = 'none';
-    const resultDiv = document.getElementById('ticketResult');
-    resultDiv.style.display = 'block';
-
-    // HTML ni chizish qismi (o'zgarishsiz)
     resultDiv.innerHTML = `
         <div class="ticket-header">Mashg'ulot ma'lumotlari:</div>       
         <div class="ticket-info-row"><span>🔑</span> <span class="info-label">Navbat:</span> <span class="token-value">${data.id || '---'}</span></div>       
-        <div class="ticket-info-row"><span>👤</span> <span class="info-label">Ism:</span> <span class="info-value">${data.full_name || 'Noma\`lum'}</span></div>
+        <div class="ticket-info-row"><span>👤</span> <span class="info-label">Ism:</span> <span class="info-value">${data.full_name || 'Noma`lum'}</span></div>
         <div class="ticket-info-row"><span>🏢</span> <span class="info-label">Markaz:</span> <span class="info-value">${data.centers ? data.centers.name : 'Topilmadi'}</span></div>
         <div class="ticket-info-row"><span>👥</span> <span class="info-label">Guruh:</span> <span class="info-value">${data.group || '---'}</span></div>
         <div class="ticket-info-row"><span>📚</span> <span class="info-label">Kurs:</span> <span class="info-value">${data.direction_category || '---'}</span></div>
