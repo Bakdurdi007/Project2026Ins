@@ -54,15 +54,18 @@ function showModal({ title, message, type = 'info', onConfirm = null }) {
 
 // ENDI ESKI KODLARNI SHUNDAY O'ZGARTIRING:
 
-// 1. Logout uchun:
-logoutBtn.addEventListener('click', () => {
-    showModal({
-        title: 'Chiqish',
-        message: 'Tizimdan chiqmoqchimisiz?',
-        type: 'confirm',
-        onConfirm: () => {
-            sessionStorage.clear();
-            window.location.replace('index.html');
-        }
+// 1. Logout uchun (Xatolik bermasligi uchun if qo'shamiz):
+const logoutBtn = document.getElementById('logoutBtn'); // yoki siz qanday id bergan bo'lsangiz
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        showModal({
+            title: 'Chiqish',
+            message: 'Tizimdan chiqmoqchimisiz?',
+            type: 'confirm',
+            onConfirm: () => {
+                sessionStorage.clear();
+                window.location.replace('index.html');
+            }
+        });
     });
-});
+}
