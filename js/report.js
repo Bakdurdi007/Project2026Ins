@@ -18,21 +18,38 @@ async function loadReports() {
     try {
         // 1. Vaqt chegaralarini belgilaymiz
         const now = new Date();
-
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-
         const last7Days = new Date();
         last7Days.setDate(now.getDate() - 7);
         const startOfWeekly = last7Days.toISOString();
-
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         const startOfYear = new Date(now.getFullYear(), 0, 1).toISOString();
 
-        // 2. Bazadan aynan shu instruktorning barcha cheklarini olamiz
-        const { data: tickets, error: tError } = await _supabase
-            .from('tickets')
-            .select('actual_minute, lesson_stop_time')
-            .eq('instructor_id', instId);
+        // 2. Bazadan aynan shu instruktorning cheklarini limitni yengib to'liq olish (Pagination)
+        let allTickets = [];
+        let isFetching = true;
+        let from = 0;
+        const step = 999;
+
+        while (isFetching) {
+            const { data, error: tError } = await _supabase
+                .from('tickets')
+                .select('actual_minute, lesson_stop_time')
+                .eq('instructor_id', instId)
+                .gte('lesson_stop_time', startOfYear) // Faqat joriy yil ma'lumotlari kerak
+                .range(from, from + step);
+
+            if (tError) throw new Error("Cheklarni yuklashda xatolik");
+
+            allTickets = allTickets.concat(data);
+
+            // Agar kelgan ma'lumot step (1000) dan kam bo'lsa, demak hammasini oldik
+            if (data.length <= step) {
+                isFetching = false;
+            } else {
+                from += step + 1;
+            }
+        }
 
         // 3. Instruktor ma'lumotini olish (stavka va source uchun)
         const { data: instructor, error: iError } = await _supabase
@@ -41,7 +58,7 @@ async function loadReports() {
             .eq('id', instId)
             .single();
 
-        if (tError || iError) throw new Error("Ma'lumot yuklashda xatolik");
+        if (iError) throw new Error("Instruktor ma'lumotini yuklashda xatolik");
 
         // Stavkalarni belgilaymiz (Admin panel bilan bir xil bo'lishi kerak)
         const MIN_RATE = 40000; // 12000 min gacha
@@ -56,14 +73,14 @@ async function loadReports() {
             } else if (totalMin > 12000) {
                 salary = (totalMin / 60) * MAX_RATE;
             }
-            return { min: totalMin, money: salary };
+            return { min: totalMin, money: Math.floor(salary) };
         };
 
         // 4. Har bir vaqt oralig'i uchun ma'lumotlarni filtrlash va hisoblash
-        const daily = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfDay));
-        const weekly = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfWeekly));
-        const monthly = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfMonth));
-        const annual = calculateStats(tickets.filter(t => t.lesson_stop_time >= startOfYear));
+        const daily = calculateStats(allTickets.filter(t => t.lesson_stop_time >= startOfDay));
+        const weekly = calculateStats(allTickets.filter(t => t.lesson_stop_time >= startOfWeekly));
+        const monthly = calculateStats(allTickets.filter(t => t.lesson_stop_time >= startOfMonth));
+        const annual = calculateStats(allTickets);
 
         // 5. Global keshga saqlaymiz
         cachedReportData = {
@@ -171,5 +188,3 @@ function setupTabs() {
         });
     });
 }
-
-loadReports();
